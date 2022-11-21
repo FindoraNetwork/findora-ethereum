@@ -22,9 +22,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/coinbase/rosetta-ethereum/configuration"
-	"github.com/coinbase/rosetta-ethereum/ethereum"
-	"github.com/coinbase/rosetta-ethereum/services"
+	"findora-rosetta/configuration"
+	findora "findora-rosetta/findora"
+	"findora-rosetta/services"
 
 	"github.com/coinbase/rosetta-sdk-go/asserter"
 	"github.com/coinbase/rosetta-sdk-go/server"
@@ -51,7 +51,7 @@ const (
 var (
 	runCmd = &cobra.Command{
 		Use:   "run",
-		Short: "Run rosetta-ethereum",
+		Short: "Run findora-rosetta",
 		RunE:  runRunCmd,
 	}
 )
@@ -65,11 +65,11 @@ func runRunCmd(cmd *cobra.Command, args []string) error {
 	// The asserter automatically rejects incorrectly formatted
 	// requests.
 	asserter, err := asserter.NewServer(
-		ethereum.OperationTypes,
-		ethereum.HistoricalBalanceSupported,
+		findora.OperationTypes,
+		findora.HistoricalBalanceSupported,
 		[]*types.NetworkIdentifier{cfg.Network},
-		ethereum.CallMethods,
-		ethereum.IncludeMempoolCoins,
+		findora.CallMethods,
+		findora.IncludeMempoolCoins,
 		"",
 	)
 	if err != nil {
@@ -83,18 +83,18 @@ func runRunCmd(cmd *cobra.Command, args []string) error {
 
 	g, ctx := errgroup.WithContext(ctx)
 
-	var client *ethereum.Client
+	var client *findora.Client
 	if cfg.Mode == configuration.Online {
-		if !cfg.RemoteGeth {
+		if !cfg.RemoteRpc {
 			g.Go(func() error {
-				return ethereum.StartGeth(ctx, cfg.GethArguments, g)
+				return findora.StartGeth(ctx, cfg.FindoraArguments, g)
 			})
 		}
 
 		var err error
-		client, err = ethereum.NewClient(cfg.GethURL, cfg.Params, cfg.SkipGethAdmin)
+		client, err = findora.NewClient(cfg.RpcURL, cfg.Params, cfg.SkipFindoraAdmin)
 		if err != nil {
-			return fmt.Errorf("%w: cannot initialize ethereum client", err)
+			return fmt.Errorf("%w: cannot initialize findora client", err)
 		}
 		defer client.Close()
 	}
@@ -127,7 +127,7 @@ func runRunCmd(cmd *cobra.Command, args []string) error {
 
 	err = g.Wait()
 	if SignalReceived {
-		return errors.New("rosetta-ethereum halted")
+		return errors.New("findora-rosetta halted")
 	}
 
 	return err

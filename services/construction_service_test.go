@@ -21,13 +21,12 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/coinbase/rosetta-ethereum/configuration"
-	"github.com/coinbase/rosetta-ethereum/ethereum"
-	mocks "github.com/coinbase/rosetta-ethereum/mocks/services"
+	"findora-rosetta/configuration"
+	findora "findora-rosetta/findora"
+	mocks "findora-rosetta/mocks/services"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/params"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -52,14 +51,14 @@ func forceMarshalMap(t *testing.T, i interface{}) map[string]interface{} {
 
 func TestConstructionService(t *testing.T) {
 	networkIdentifier = &types.NetworkIdentifier{
-		Network:    ethereum.RopstenNetwork,
-		Blockchain: ethereum.Blockchain,
+		Network:    findora.AnvilNetwork,
+		Blockchain: findora.Blockchain,
 	}
 
 	cfg := &configuration.Configuration{
 		Mode:    configuration.Online,
 		Network: networkIdentifier,
-		Params:  params.RopstenChainConfig,
+		Params:  findora.AnvilChainConfig,
 	}
 
 	mockClient := &mocks.Client{}
@@ -135,7 +134,7 @@ func TestConstructionService(t *testing.T) {
 		SuggestedFee: []*types.Amount{
 			{
 				Value:    "21000000000000",
-				Currency: ethereum.Currency,
+				Currency: findora.Currency,
 			},
 		},
 	}, metadataResponse)

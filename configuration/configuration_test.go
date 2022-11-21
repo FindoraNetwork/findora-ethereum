@@ -16,23 +16,21 @@ package configuration
 
 import (
 	"errors"
+	findora "findora-rosetta/findora"
 	"os"
 	"testing"
 
-	"github.com/coinbase/rosetta-ethereum/ethereum"
-
 	"github.com/coinbase/rosetta-sdk-go/types"
-	"github.com/ethereum/go-ethereum/params"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestLoadConfiguration(t *testing.T) {
 	tests := map[string]struct {
-		Mode          string
-		Network       string
-		Port          string
-		Geth          string
-		SkipGethAdmin string
+		Mode             string
+		Network          string
+		Port             string
+		Findora          string
+		SkipFindoraAdmin string
 
 		cfg *Configuration
 		err error
@@ -50,118 +48,101 @@ func TestLoadConfiguration(t *testing.T) {
 			err:     errors.New("PORT must be populated"),
 		},
 		"all set (mainnet)": {
-			Mode:          string(Online),
-			Network:       Mainnet,
-			Port:          "1000",
-			SkipGethAdmin: "FALSE",
+			Mode:             string(Online),
+			Network:          Mainnet,
+			Port:             "1000",
+			SkipFindoraAdmin: "FALSE",
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
-					Network:    ethereum.MainnetNetwork,
-					Blockchain: ethereum.Blockchain,
+					Network:    findora.MainnetNetwork,
+					Blockchain: findora.Blockchain,
 				},
-				Params:                 params.MainnetChainConfig,
-				GenesisBlockIdentifier: ethereum.MainnetGenesisBlockIdentifier,
+				Params:                 findora.MainnetChainConfig,
+				GenesisBlockIdentifier: findora.MainnetGenesisBlockIdentifier,
 				Port:                   1000,
-				GethURL:                DefaultGethURL,
-				GethArguments:          ethereum.MainnetGethArguments,
-				SkipGethAdmin:          false,
+				RpcURL:                 DefaultRpcURL,
+				FindoraArguments:       findora.MainnetCommandArguments,
+				SkipFindoraAdmin:       false,
 			},
 		},
-		"all set (mainnet) + geth": {
-			Mode:          string(Online),
-			Network:       Mainnet,
-			Port:          "1000",
-			Geth:          "http://blah",
-			SkipGethAdmin: "TRUE",
+		"all set (mainnet) + findora": {
+			Mode:             string(Online),
+			Network:          Mainnet,
+			Port:             "1000",
+			Findora:          "http://blah",
+			SkipFindoraAdmin: "TRUE",
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
-					Network:    ethereum.MainnetNetwork,
-					Blockchain: ethereum.Blockchain,
+					Network:    findora.MainnetNetwork,
+					Blockchain: findora.Blockchain,
 				},
-				Params:                 params.MainnetChainConfig,
-				GenesisBlockIdentifier: ethereum.MainnetGenesisBlockIdentifier,
+				Params:                 findora.MainnetChainConfig,
+				GenesisBlockIdentifier: findora.MainnetGenesisBlockIdentifier,
 				Port:                   1000,
-				GethURL:                "http://blah",
-				RemoteGeth:             true,
-				GethArguments:          ethereum.MainnetGethArguments,
-				SkipGethAdmin:          true,
+				RpcURL:                 "http://blah",
+				RemoteRpc:              true,
+				FindoraArguments:       findora.MainnetCommandArguments,
+				SkipFindoraAdmin:       true,
 			},
 		},
-		"all set (ropsten)": {
+		"all set (anvil)": {
 			Mode:    string(Online),
-			Network: Ropsten,
+			Network: Anvil,
 			Port:    "1000",
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
-					Network:    ethereum.RopstenNetwork,
-					Blockchain: ethereum.Blockchain,
+					Network:    findora.AnvilNetwork,
+					Blockchain: findora.Blockchain,
 				},
-				Params:                 params.RopstenChainConfig,
-				GenesisBlockIdentifier: ethereum.RopstenGenesisBlockIdentifier,
+				Params:                 findora.AnvilChainConfig,
+				GenesisBlockIdentifier: findora.AnvilGenesisBlockIdentifier,
 				Port:                   1000,
-				GethURL:                DefaultGethURL,
-				GethArguments:          ethereum.RopstenGethArguments,
-			},
-		},
-		"all set (rinkeby)": {
-			Mode:    string(Online),
-			Network: Rinkeby,
-			Port:    "1000",
-			cfg: &Configuration{
-				Mode: Online,
-				Network: &types.NetworkIdentifier{
-					Network:    ethereum.RinkebyNetwork,
-					Blockchain: ethereum.Blockchain,
-				},
-				Params:                 params.RinkebyChainConfig,
-				GenesisBlockIdentifier: ethereum.RinkebyGenesisBlockIdentifier,
-				Port:                   1000,
-				GethURL:                DefaultGethURL,
-				GethArguments:          ethereum.RinkebyGethArguments,
-			},
-		},
-		"all set (goerli)": {
-			Mode:    string(Online),
-			Network: Goerli,
-			Port:    "1000",
-			cfg: &Configuration{
-				Mode: Online,
-				Network: &types.NetworkIdentifier{
-					Network:    ethereum.GoerliNetwork,
-					Blockchain: ethereum.Blockchain,
-				},
-				Params:                 params.GoerliChainConfig,
-				GenesisBlockIdentifier: ethereum.GoerliGenesisBlockIdentifier,
-				Port:                   1000,
-				GethURL:                DefaultGethURL,
-				GethArguments:          ethereum.GoerliGethArguments,
+				RpcURL:                 DefaultRpcURL,
+				FindoraArguments:       findora.AnvilCommandArguments,
 			},
 		},
 		"all set (testnet)": {
-			Mode:          string(Online),
-			Network:       Testnet,
-			Port:          "1000",
-			SkipGethAdmin: "TRUE",
+			Mode:             string(Online),
+			Network:          Testnet,
+			Port:             "1000",
+			SkipFindoraAdmin: "TRUE",
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
-					Network:    ethereum.RopstenNetwork,
-					Blockchain: ethereum.Blockchain,
+					Network:    findora.AnvilNetwork,
+					Blockchain: findora.Blockchain,
 				},
-				Params:                 params.RopstenChainConfig,
-				GenesisBlockIdentifier: ethereum.RopstenGenesisBlockIdentifier,
+				Params:                 findora.AnvilChainConfig,
+				GenesisBlockIdentifier: findora.AnvilGenesisBlockIdentifier,
 				Port:                   1000,
-				GethURL:                DefaultGethURL,
-				GethArguments:          ethereum.RopstenGethArguments,
-				SkipGethAdmin:          true,
+				RpcURL:                 DefaultRpcURL,
+				FindoraArguments:       findora.AnvilCommandArguments,
+				SkipFindoraAdmin:       true,
+			},
+		},
+		"all set (private blockchain)": {
+			Mode:    string(Online),
+			Network: Prinet,
+			Port:    "1000",
+			cfg: &Configuration{
+				Mode: Online,
+				Network: &types.NetworkIdentifier{
+					Network:    findora.PrinetNetwork,
+					Blockchain: findora.Blockchain,
+				},
+				Params:                 findora.PrinetPChainConfig,
+				GenesisBlockIdentifier: findora.PrinetGenesisBlockIdentifier,
+				Port:                   1000,
+				RpcURL:                 DefaultRpcURL,
+				FindoraArguments:       findora.PrinetCommandArguments,
 			},
 		},
 		"invalid mode": {
 			Mode:    "bad mode",
-			Network: Ropsten,
+			Network: Anvil,
 			Port:    "1000",
 			err:     errors.New("bad mode is not a valid mode"),
 		},
@@ -173,7 +154,7 @@ func TestLoadConfiguration(t *testing.T) {
 		},
 		"invalid port": {
 			Mode:    string(Offline),
-			Network: Ropsten,
+			Network: Anvil,
 			Port:    "bad port",
 			err:     errors.New("unable to parse port bad port"),
 		},
@@ -184,8 +165,8 @@ func TestLoadConfiguration(t *testing.T) {
 			os.Setenv(ModeEnv, test.Mode)
 			os.Setenv(NetworkEnv, test.Network)
 			os.Setenv(PortEnv, test.Port)
-			os.Setenv(GethEnv, test.Geth)
-			os.Setenv(SkipGethAdminEnv, test.SkipGethAdmin)
+			os.Setenv(RpcEnv, test.Findora)
+			os.Setenv(SkipFindoraAdminEnv, test.SkipFindoraAdmin)
 
 			cfg, err := LoadConfiguration()
 			if test.err != nil {

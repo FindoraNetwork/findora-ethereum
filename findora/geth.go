@@ -28,11 +28,11 @@ import (
 )
 
 const (
-	gethLogger       = "geth"
-	gethStdErrLogger = "geth err"
+	findoraLogger       = "findora"
+	findoraStdErrLogger = "findora err"
 )
 
-// logPipe prints out logs from geth. We don't end when context
+// logPipe prints out logs from findora. We don't end when context
 // is canceled beacause there are often logs printed after this.
 func logPipe(pipe io.ReadCloser, identifier string) error {
 	reader := bufio.NewReader(pipe)
@@ -48,7 +48,7 @@ func logPipe(pipe io.ReadCloser, identifier string) error {
 	}
 }
 
-// StartGeth starts a geth daemon in another goroutine
+// StartGeth starts a findora daemon in another goroutine
 // and logs the results to the console.
 func StartGeth(ctx context.Context, arguments string, g *errgroup.Group) error {
 	parsedArgs := strings.Split(arguments, " ")
@@ -68,21 +68,21 @@ func StartGeth(ctx context.Context, arguments string, g *errgroup.Group) error {
 	}
 
 	g.Go(func() error {
-		return logPipe(stdout, gethLogger)
+		return logPipe(stdout, findoraLogger)
 	})
 
 	g.Go(func() error {
-		return logPipe(stderr, gethStdErrLogger)
+		return logPipe(stderr, findoraStdErrLogger)
 	})
 
 	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("%w: unable to start geth", err)
+		return fmt.Errorf("%w: unable to start findora", err)
 	}
 
 	g.Go(func() error {
 		<-ctx.Done()
 
-		log.Println("sending interrupt to geth")
+		log.Println("sending interrupt to findora")
 		return cmd.Process.Signal(os.Interrupt)
 	})
 

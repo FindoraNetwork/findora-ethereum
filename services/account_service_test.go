@@ -18,9 +18,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/coinbase/rosetta-ethereum/configuration"
-	"github.com/coinbase/rosetta-ethereum/ethereum"
-	mocks "github.com/coinbase/rosetta-ethereum/mocks/services"
+	"findora-rosetta/configuration"
+	findora "findora-rosetta/findora"
+	mocks "findora-rosetta/mocks/services"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/stretchr/testify/assert"
@@ -69,7 +69,7 @@ func TestAccountBalance_Online(t *testing.T) {
 		Balances: []*types.Amount{
 			{
 				Value:    "25",
-				Currency: ethereum.Currency,
+				Currency: findora.Currency,
 			},
 		},
 	}

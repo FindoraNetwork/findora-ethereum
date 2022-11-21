@@ -20,7 +20,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/coinbase/rosetta-ethereum/ethereum"
+	findora "findora-rosetta/findora"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum/params"
@@ -39,19 +39,16 @@ const (
 	// to make outbound connections.
 	Offline Mode = "OFFLINE"
 
-	// Mainnet is the Ethereum Mainnet.
+	// Mainnet is the findora Mainnet.
 	Mainnet string = "MAINNET"
 
-	// Ropsten is the Ethereum Ropsten testnet.
-	Ropsten string = "ROPSTEN"
+	// Anvil is the findora Anvil testnet.
+	Anvil string = "ANVIL"
 
-	// Rinkeby is the Ethereum Rinkeby testnet.
-	Rinkeby string = "RINKEBY"
+	// Prinet is the findora Prinet testnet.
+	Prinet string = "PRINET"
 
-	// Goerli is the Ethereum Görli testnet.
-	Goerli string = "GOERLI"
-
-	// Testnet defaults to `Ropsten` for backwards compatibility.
+	// Testnet defaults to `Anvil` for backwards compatibility.
 	Testnet string = "TESTNET"
 
 	// DataDirectory is the default location for all
@@ -71,22 +68,22 @@ const (
 	// implementation.
 	PortEnv = "PORT"
 
-	// GethEnv is an optional environment variable
-	// used to connect rosetta-ethereum to an already
-	// running geth node.
-	GethEnv = "GETH"
+	// RpcEnv is an optional environment variable
+	// used to connect findora-rosetta to an already
+	// running findora node.
+	RpcEnv = "RPCURL"
 
-	// DefaultGethURL is the default URL for
-	// a running geth node. This is used
-	// when GethEnv is not populated.
-	DefaultGethURL = "http://localhost:8545"
+	// DefaultRpcURL is the default URL for
+	// a running findora node. This is used
+	// when RpcEnv is not populated.
+	DefaultRpcURL = "http://127.0.0.1:8545"
 
-	// SkipGethAdminEnv is an optional environment variable
-	// to skip geth `admin` calls which are typically not supported
+	// SkipFindoraAdminEnv is an optional environment variable
+	// to skip findora `admin` calls which are typically not supported
 	// by hosted node services. When not set, defaults to false.
-	SkipGethAdminEnv = "SKIP_GETH_ADMIN"
+	SkipFindoraAdminEnv = "SKIP_FINDORA_ADMIN"
 
-	// MiddlewareVersion is the version of rosetta-ethereum.
+	// MiddlewareVersion is the version of findora-rosetta.
 	MiddlewareVersion = "0.0.4"
 )
 
@@ -95,11 +92,11 @@ type Configuration struct {
 	Mode                   Mode
 	Network                *types.NetworkIdentifier
 	GenesisBlockIdentifier *types.BlockIdentifier
-	GethURL                string
-	RemoteGeth             bool
+	RpcURL                 string
+	RemoteRpc              bool
 	Port                   int
-	GethArguments          string
-	SkipGethAdmin          bool
+	FindoraArguments       string
+	SkipFindoraAdmin       bool
 
 	// Block Reward Data
 	Params *params.ChainConfig
@@ -126,57 +123,49 @@ func LoadConfiguration() (*Configuration, error) {
 	switch networkValue {
 	case Mainnet:
 		config.Network = &types.NetworkIdentifier{
-			Blockchain: ethereum.Blockchain,
-			Network:    ethereum.MainnetNetwork,
+			Blockchain: findora.Blockchain,
+			Network:    findora.MainnetNetwork,
 		}
-		config.GenesisBlockIdentifier = ethereum.MainnetGenesisBlockIdentifier
-		config.Params = params.MainnetChainConfig
-		config.GethArguments = ethereum.MainnetGethArguments
-	case Testnet, Ropsten:
+		config.GenesisBlockIdentifier = findora.MainnetGenesisBlockIdentifier
+		config.Params = findora.MainnetChainConfig
+		config.FindoraArguments = findora.MainnetCommandArguments
+	case Testnet, Anvil:
 		config.Network = &types.NetworkIdentifier{
-			Blockchain: ethereum.Blockchain,
-			Network:    ethereum.RopstenNetwork,
+			Blockchain: findora.Blockchain,
+			Network:    findora.AnvilNetwork,
 		}
-		config.GenesisBlockIdentifier = ethereum.RopstenGenesisBlockIdentifier
-		config.Params = params.RopstenChainConfig
-		config.GethArguments = ethereum.RopstenGethArguments
-	case Rinkeby:
+		config.GenesisBlockIdentifier = findora.AnvilGenesisBlockIdentifier
+		config.Params = findora.AnvilChainConfig
+		config.FindoraArguments = findora.AnvilCommandArguments
+	case Prinet:
 		config.Network = &types.NetworkIdentifier{
-			Blockchain: ethereum.Blockchain,
-			Network:    ethereum.RinkebyNetwork,
+			Blockchain: findora.Blockchain,
+			Network:    findora.PrinetNetwork,
 		}
-		config.GenesisBlockIdentifier = ethereum.RinkebyGenesisBlockIdentifier
-		config.Params = params.RinkebyChainConfig
-		config.GethArguments = ethereum.RinkebyGethArguments
-	case Goerli:
-		config.Network = &types.NetworkIdentifier{
-			Blockchain: ethereum.Blockchain,
-			Network:    ethereum.GoerliNetwork,
-		}
-		config.GenesisBlockIdentifier = ethereum.GoerliGenesisBlockIdentifier
-		config.Params = params.GoerliChainConfig
-		config.GethArguments = ethereum.GoerliGethArguments
+		config.GenesisBlockIdentifier = findora.PrinetGenesisBlockIdentifier
+		config.Params = findora.PrinetPChainConfig
+		config.FindoraArguments = findora.PrinetCommandArguments
 	case "":
 		return nil, errors.New("NETWORK must be populated")
 	default:
 		return nil, fmt.Errorf("%s is not a valid network", networkValue)
 	}
 
-	config.GethURL = DefaultGethURL
-	envGethURL := os.Getenv(GethEnv)
-	if len(envGethURL) > 0 {
-		config.RemoteGeth = true
-		config.GethURL = envGethURL
+	config.RpcURL = DefaultRpcURL
+	envRpcURL := os.Getenv(RpcEnv)
+	if len(envRpcURL) > 0 {
+		config.RemoteRpc = true
+		config.RpcURL = envRpcURL
 	}
 
-	config.SkipGethAdmin = false
-	envSkipGethAdmin := os.Getenv(SkipGethAdminEnv)
-	if len(envSkipGethAdmin) > 0 {
-		val, err := strconv.ParseBool(envSkipGethAdmin)
+	config.SkipFindoraAdmin = false
+	envSkipFindoraAdmin := os.Getenv(SkipFindoraAdminEnv)
+	if len(envSkipFindoraAdmin) > 0 {
+		val, err := strconv.ParseBool(envSkipFindoraAdmin)
 		if err != nil {
-			return nil, fmt.Errorf("%w: unable to parse SKIP_GETH_ADMIN %s", err, envSkipGethAdmin)
+			return nil, fmt.Errorf("%w: unable to parse SKIP_FINDORA_ADMIN %s", err, envSkipFindoraAdmin)
 		}
-		config.SkipGethAdmin = val
+		config.SkipFindoraAdmin = val
 	}
 
 	portValue := os.Getenv(PortEnv)

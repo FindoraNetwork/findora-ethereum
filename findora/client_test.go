@@ -25,7 +25,7 @@ import (
 	"sort"
 	"testing"
 
-	mocks "github.com/coinbase/rosetta-ethereum/mocks/ethereum"
+	mocks "findora-rosetta/mocks/ethereum"
 
 	RosettaTypes "github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum/go-ethereum"
@@ -34,7 +34,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/eth/tracers"
 	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -1182,7 +1181,7 @@ func TestBlock_Current(t *testing.T) {
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
 		tc:             tc,
-		p:              params.RopstenChainConfig,
+		p:              AnvilChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 
@@ -1254,7 +1253,7 @@ func TestBlock_Hash(t *testing.T) {
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
 		tc:             tc,
-		p:              params.RopstenChainConfig,
+		p:              AnvilChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 
@@ -1330,7 +1329,7 @@ func TestBlock_Index(t *testing.T) {
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
 		tc:             tc,
-		p:              params.RopstenChainConfig,
+		p:              AnvilChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 
@@ -1404,7 +1403,7 @@ func TestBlock_FirstBlock(t *testing.T) {
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
 		tc:             tc,
-		p:              params.RopstenChainConfig,
+		p:              AnvilChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 
@@ -1487,7 +1486,7 @@ func TestTransaction_Hash(t *testing.T) {
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
 		tc:             tc,
-		p:              params.RopstenChainConfig,
+		p:              AnvilChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 
@@ -1619,7 +1618,7 @@ func TestBlock_10994(t *testing.T) {
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
 		tc:             tc,
-		p:              params.RopstenChainConfig,
+		p:              AnvilChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 
@@ -1725,7 +1724,7 @@ func TestBlock_10991(t *testing.T) {
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
 		tc:             tc,
-		p:              params.RopstenChainConfig,
+		p:              AnvilChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 
@@ -1830,7 +1829,7 @@ func TestBlock_239782(t *testing.T) {
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
 		tc:             tc,
-		p:              params.RopstenChainConfig,
+		p:              AnvilChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 
@@ -1936,7 +1935,7 @@ func TestBlock_363415(t *testing.T) {
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
 		tc:             tc,
-		p:              params.RopstenChainConfig,
+		p:              AnvilChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 
@@ -2048,7 +2047,7 @@ func TestBlock_363753(t *testing.T) {
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
 		tc:             tc,
-		p:              params.RopstenChainConfig,
+		p:              AnvilChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 
@@ -2160,7 +2159,7 @@ func TestBlock_468179(t *testing.T) {
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
 		tc:             tc,
-		p:              params.RopstenChainConfig,
+		p:              AnvilChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 
@@ -2272,7 +2271,7 @@ func TestBlock_363366(t *testing.T) {
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
 		tc:             tc,
-		p:              params.RopstenChainConfig,
+		p:              AnvilChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 
@@ -2385,7 +2384,7 @@ func TestBlock_468194(t *testing.T) {
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
 		tc:             tc,
-		p:              params.RopstenChainConfig,
+		p:              AnvilChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 
@@ -2499,7 +2498,7 @@ func TestBlock_13998626(t *testing.T) {
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
 		tc:             tc,
-		p:              params.RopstenChainConfig,
+		p:              AnvilChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 

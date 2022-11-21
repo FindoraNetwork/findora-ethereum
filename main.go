@@ -17,7 +17,7 @@ package main
 import (
 	"os"
 
-	"github.com/coinbase/rosetta-ethereum/cmd"
+	"findora-rosetta/cmd"
 
 	"github.com/fatih/color"
 )

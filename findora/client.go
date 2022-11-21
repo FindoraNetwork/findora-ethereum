@@ -32,16 +32,17 @@ import (
 	"github.com/ethereum/go-ethereum/consensus/ethash"
 	"github.com/ethereum/go-ethereum/core/types"
 	EthTypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth/tracers"
 	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/rpc"
 	"golang.org/x/sync/semaphore"
+
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 const (
-	gethHTTPTimeout = 120 * time.Second
+	findoraHTTPTimeout = 120 * time.Second
 
 	maxTraceConcurrency  = int64(16) // nolint:gomnd
 	semaphoreTraceWeight = int64(1)  // nolint:gomnd
@@ -51,17 +52,20 @@ const (
 	eip1559TxType = 2
 )
 
-// Client allows for querying a set of specific Ethereum endpoints in an
+// Client allows for querying a set of specific Findora endpoints in an
 // idempotent manner. Client relies on the eth_*, debug_*, admin_*, and txpool_*
 // methods and on the graphql endpoint.
 //
 // Client borrows HEAVILY from https://github.com/ethereum/go-ethereum/tree/master/ethclient.
 type Client struct {
-	p  *params.ChainConfig
-	tc *tracers.TraceConfig
+	p *params.ChainConfig
+	// tc *tracers.TraceConfig
 
 	c JSONRPC
-	g GraphQL
+
+	c2 *ethclient.Client
+
+	// g GraphQL
 
 	traceSemaphore *semaphore.Weighted
 
@@ -71,23 +75,31 @@ type Client struct {
 // NewClient creates a Client that from the provided url and params.
 func NewClient(url string, params *params.ChainConfig, skipAdminCalls bool) (*Client, error) {
 	c, err := rpc.DialHTTPWithClient(url, &http.Client{
-		Timeout: gethHTTPTimeout,
+		Timeout: findoraHTTPTimeout,
 	})
 	if err != nil {
+		defer c.Close()
 		return nil, fmt.Errorf("%w: unable to dial node", err)
 	}
 
-	tc, err := loadTraceConfig()
+	c2, err := ethclient.Dial(url)
 	if err != nil {
-		return nil, fmt.Errorf("%w: unable to load trace config", err)
+		defer c2.Close()
+		return nil, fmt.Errorf("%w: cannot initialize ethclient client", err)
 	}
 
-	g, err := newGraphQLClient(url)
-	if err != nil {
-		return nil, fmt.Errorf("%w: unable to create GraphQL client", err)
-	}
+	// tc, err := loadTraceConfig()
+	// if err != nil {
+	// 	return nil, fmt.Errorf("%w: unable to load trace config", err)
+	// }
 
-	return &Client{params, tc, c, g, semaphore.NewWeighted(maxTraceConcurrency), skipAdminCalls}, nil
+	// g, err := newGraphQLClient(url)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("%w: unable to create GraphQL client", err)
+	// }
+
+	// return &Client{params, tc, c, g, semaphore.NewWeighted(maxTraceConcurrency), skipAdminCalls}, nil
+	return &Client{params, c, c2, semaphore.NewWeighted(maxTraceConcurrency), skipAdminCalls}, nil
 }
 
 // Close shuts down the RPC client connection.
@@ -95,7 +107,7 @@ func (ec *Client) Close() {
 	ec.c.Close()
 }
 
-// Status returns geth status information
+// Status returns findora status information
 // for determining node healthiness.
 func (ec *Client) Status(ctx context.Context) (
 	*RosettaTypes.BlockIdentifier,
@@ -125,10 +137,11 @@ func (ec *Client) Status(ctx context.Context) (
 		}
 	}
 
-	peers, err := ec.peers(ctx)
-	if err != nil {
-		return nil, -1, nil, nil, err
-	}
+	var peers []*RosettaTypes.Peer = make([]*RosettaTypes.Peer, 0)
+	//peers, err := ec.peers(ctx)
+	//if err != nil {
+	//	return nil, -1, nil, nil, err
+	//}
 
 	return &RosettaTypes.BlockIdentifier{
 			Hash:  header.Hash().Hex(),
@@ -265,10 +278,10 @@ func (ec *Client) Transaction(
 	var addTraces bool
 	if header.Number.Int64() != GenesisBlockIndex { // not possible to get traces at genesis
 		addTraces = true
-		traces, rawTraces, err = ec.getTransactionTraces(ctx, body.tx.Hash())
-		if err != nil {
-			return nil, fmt.Errorf("%w: could not get traces for %x", err, body.tx.Hash())
-		}
+		// traces, rawTraces, err = ec.getTransactionTraces(ctx, body.tx.Hash())
+		// if err != nil {
+		// 	return nil, fmt.Errorf("%w: could not get traces for %x", err, body.tx.Hash())
+		// }
 	}
 
 	loadedTx := body.LoadedTransaction()
@@ -452,16 +465,16 @@ func (ec *Client) getBlock(
 	//
 	// We fetch traces last because we want to avoid limiting the number of other
 	// block-related data fetches we perform concurrently (we limit the number of
-	// concurrent traces that are computed to 16 to avoid overwhelming geth).
+	// concurrent traces that are computed to 16 to avoid overwhelming findora).
 	var traces []*rpcCall
 	var rawTraces []*rpcRawCall
 	var addTraces bool
 	if head.Number.Int64() != GenesisBlockIndex { // not possible to get traces at genesis
 		addTraces = true
-		traces, rawTraces, err = ec.getBlockTraces(ctx, body.Hash)
-		if err != nil {
-			return nil, nil, fmt.Errorf("%w: could not get traces for %x", err, body.Hash[:])
-		}
+		// traces, rawTraces, err = ec.getBlockTraces(ctx, body.Hash)
+		// if err != nil {
+		// 	return nil, nil, fmt.Errorf("%w: could not get traces for %x", err, body.Hash[:])
+		// }
 	}
 
 	// Convert all txs to loaded txs
@@ -533,59 +546,59 @@ func effectiveGasPrice(tx *EthTypes.Transaction, baseFee *big.Int) (*big.Int, er
 	return new(big.Int).Add(tip, baseFee), nil
 }
 
-func (ec *Client) getTransactionTraces(
-	ctx context.Context,
-	transactionHash common.Hash,
-) (*Call, json.RawMessage, error) {
-	if err := ec.traceSemaphore.Acquire(ctx, semaphoreTraceWeight); err != nil {
-		return nil, nil, err
-	}
-	defer ec.traceSemaphore.Release(semaphoreTraceWeight)
+// func (ec *Client) getTransactionTraces(
+// 	ctx context.Context,
+// 	transactionHash common.Hash,
+// ) (*Call, json.RawMessage, error) {
+// 	if err := ec.traceSemaphore.Acquire(ctx, semaphoreTraceWeight); err != nil {
+// 		return nil, nil, err
+// 	}
+// 	defer ec.traceSemaphore.Release(semaphoreTraceWeight)
 
-	var call *Call
-	var raw json.RawMessage
-	err := ec.c.CallContext(ctx, &raw, "debug_traceTransaction", transactionHash, ec.tc)
-	if err != nil {
-		return nil, nil, err
-	}
+// 	var call *Call
+// 	var raw json.RawMessage
+// 	err := ec.c.CallContext(ctx, &raw, "debug_traceTransaction", transactionHash, ec.tc)
+// 	if err != nil {
+// 		return nil, nil, err
+// 	}
 
-	// Decode *Call
-	if err := json.Unmarshal(raw, &call); err != nil {
-		return nil, nil, err
-	}
+// 	// Decode *Call
+// 	if err := json.Unmarshal(raw, &call); err != nil {
+// 		return nil, nil, err
+// 	}
 
-	return call, raw, nil
-}
+// 	return call, raw, nil
+// }
 
-func (ec *Client) getBlockTraces(
-	ctx context.Context,
-	blockHash common.Hash,
-) ([]*rpcCall, []*rpcRawCall, error) {
-	if err := ec.traceSemaphore.Acquire(ctx, semaphoreTraceWeight); err != nil {
-		return nil, nil, err
-	}
-	defer ec.traceSemaphore.Release(semaphoreTraceWeight)
+// func (ec *Client) getBlockTraces(
+// 	ctx context.Context,
+// 	blockHash common.Hash,
+// ) ([]*rpcCall, []*rpcRawCall, error) {
+// 	if err := ec.traceSemaphore.Acquire(ctx, semaphoreTraceWeight); err != nil {
+// 		return nil, nil, err
+// 	}
+// 	defer ec.traceSemaphore.Release(semaphoreTraceWeight)
 
-	var calls []*rpcCall
-	var rawCalls []*rpcRawCall
-	var raw json.RawMessage
-	err := ec.c.CallContext(ctx, &raw, "debug_traceBlockByHash", blockHash, ec.tc)
-	if err != nil {
-		return nil, nil, err
-	}
+// 	var calls []*rpcCall
+// 	var rawCalls []*rpcRawCall
+// 	var raw json.RawMessage
+// 	err := ec.c.CallContext(ctx, &raw, "debug_traceBlockByHash", blockHash, ec.tc)
+// 	if err != nil {
+// 		return nil, nil, err
+// 	}
 
-	// Decode []*rpcCall
-	if err := json.Unmarshal(raw, &calls); err != nil {
-		return nil, nil, err
-	}
+// 	// Decode []*rpcCall
+// 	if err := json.Unmarshal(raw, &calls); err != nil {
+// 		return nil, nil, err
+// 	}
 
-	// Decode []*rpcRawCall
-	if err := json.Unmarshal(raw, &rawCalls); err != nil {
-		return nil, nil, err
-	}
+// 	// Decode []*rpcRawCall
+// 	if err := json.Unmarshal(raw, &rawCalls); err != nil {
+// 		return nil, nil, err
+// 	}
 
-	return calls, rawCalls, nil
-}
+// 	return calls, rawCalls, nil
+// }
 
 func (ec *Client) getBlockReceipts(
 	ctx context.Context,
@@ -637,7 +650,7 @@ type rpcRawCall struct {
 	Result json.RawMessage `json:"result"`
 }
 
-// Call is an Ethereum debug trace.
+// Call is an Findora debug trace.
 type Call struct {
 	Type         string         `json:"type"`
 	From         common.Address `json:"from"`
@@ -1161,7 +1174,7 @@ func (ec *Client) getParsedBlock(
 		}
 	}
 
-	txs, err := ec.populateTransactions(blockIdentifier, block, loadedTransactions)
+	txs, err := ec.populateTransactions2(blockIdentifier, block, loadedTransactions)
 	if err != nil {
 		return nil, err
 	}
@@ -1204,6 +1217,30 @@ func (ec *Client) populateTransactions(
 		}
 
 		transactions[i+1] = transaction
+	}
+
+	return transactions, nil
+}
+
+func (ec *Client) populateTransactions2(
+	blockIdentifier *RosettaTypes.BlockIdentifier,
+	block *EthTypes.Block,
+	loadedTransactions []*loadedTransaction,
+) ([]*RosettaTypes.Transaction, error) {
+	transactions := make(
+		[]*RosettaTypes.Transaction,
+		len(block.Transactions()),
+	)
+
+	for i, tx := range loadedTransactions {
+		transaction, err := ec.populateTransaction(
+			tx,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("%w: cannot parse %s", err, tx.Transaction.Hash().Hex())
+		}
+
+		transactions[i] = transaction
 	}
 
 	return transactions, nil
@@ -1413,53 +1450,101 @@ func (ec *Client) Balance(
 	account *RosettaTypes.AccountIdentifier,
 	block *RosettaTypes.PartialBlockIdentifier,
 ) (*RosettaTypes.AccountBalanceResponse, error) {
-	blockQuery := ""
-	if block != nil {
-		if block.Hash != nil {
-			blockQuery = fmt.Sprintf(`hash: "%s"`, *block.Hash)
-		}
-		if block.Hash == nil && block.Index != nil {
-			blockQuery = fmt.Sprintf("number: %d", *block.Index)
-		}
-	}
+	// // blockQuery := ""
+	// // if block != nil {
+	// // 	if block.Hash != nil {
+	// // 		blockQuery = fmt.Sprintf(`hash: "%s"`, *block.Hash)
+	// // 	}
+	// // 	if block.Hash == nil && block.Index != nil {
+	// // 		blockQuery = fmt.Sprintf("number: %d", *block.Index)
+	// // 	}
+	// // }
 
-	result, err := ec.g.Query(ctx, fmt.Sprintf(`{
-			block(%s){
-				hash
-				number
-				account(address:"%s"){
-					balance
-					transactionCount
-					code
-				}
-			}
-		}`, blockQuery, account.Address))
+	// var result []byte
+	// // result, err := ec.g.Query(ctx, fmt.Sprintf(`{
+	// // 		block(%s){
+	// // 			hash
+	// // 			number
+	// // 			account(address:"%s"){
+	// // 				balance
+	// // 				transactionCount
+	// // 				code
+	// // 			}
+	// // 		}
+	// // 	}`, blockQuery, account.Address))
+	// // if err != nil {
+	// // 	return nil, err
+	// // }
+
+	// var bal graphqlBalance
+	// if err := json.Unmarshal([]byte(result), &bal); err != nil {
+	// 	return nil, err
+	// }
+
+	// if len(bal.Errors) > 0 {
+	// 	return nil, errors.New(RosettaTypes.PrintStruct(bal.Errors))
+	// }
+
+	// balance, ok := new(big.Int).SetString(bal.Data.Block.Account.Balance[2:], 16)
+	// if !ok {
+	// 	return nil, fmt.Errorf(
+	// 		"could not extract account balance from %s",
+	// 		bal.Data.Block.Account.Balance,
+	// 	)
+	// }
+	// nonce, ok := new(big.Int).SetString(bal.Data.Block.Account.Nonce[2:], 16)
+	// if !ok {
+	// 	return nil, fmt.Errorf(
+	// 		"could not extract account nonce from %s",
+	// 		bal.Data.Block.Account.Nonce,
+	// 	)
+	// }
+
+	// return &RosettaTypes.AccountBalanceResponse{
+	// 	Balances: []*RosettaTypes.Amount{
+	// 		{
+	// 			Value:    balance.String(),
+	// 			Currency: Currency,
+	// 		},
+	// 	},
+	// 	BlockIdentifier: &RosettaTypes.BlockIdentifier{
+	// 		Hash:  bal.Data.Block.Hash,
+	// 		Index: bal.Data.Block.Number,
+	// 	},
+	// 	Metadata: map[string]interface{}{
+	// 		"nonce": nonce.Int64(),
+	// 		"code":  bal.Data.Block.Account.Code,
+	// 	},
+	// }, nil
+
+	var err error
+	var eth_block *types.Block
+	if block != nil && block.Hash != nil {
+		eth_block, err = ec.c2.BlockByHash(ctx, common.HexToHash(*block.Hash))
+	} else if block != nil && block.Index != nil {
+		eth_block, err = ec.c2.BlockByNumber(ctx, big.NewInt(*block.Index))
+	} else {
+		eth_block, err = ec.c2.BlockByNumber(ctx, nil) // latest block
+	}
+	if err != nil {
+		return nil, err
+	}
+	blockNum := eth_block.Header().Number
+	address := common.HexToAddress(account.Address)
+
+	code, err := ec.c2.CodeAt(ctx, address, blockNum)
 	if err != nil {
 		return nil, err
 	}
 
-	var bal graphqlBalance
-	if err := json.Unmarshal([]byte(result), &bal); err != nil {
+	balance, err := ec.c2.BalanceAt(ctx, address, blockNum)
+	if err != nil {
 		return nil, err
 	}
 
-	if len(bal.Errors) > 0 {
-		return nil, errors.New(RosettaTypes.PrintStruct(bal.Errors))
-	}
-
-	balance, ok := new(big.Int).SetString(bal.Data.Block.Account.Balance[2:], 16)
-	if !ok {
-		return nil, fmt.Errorf(
-			"could not extract account balance from %s",
-			bal.Data.Block.Account.Balance,
-		)
-	}
-	nonce, ok := new(big.Int).SetString(bal.Data.Block.Account.Nonce[2:], 16)
-	if !ok {
-		return nil, fmt.Errorf(
-			"could not extract account nonce from %s",
-			bal.Data.Block.Account.Nonce,
-		)
+	nonce, err := ec.c2.NonceAt(ctx, address, blockNum)
+	if err != nil {
+		return nil, err
 	}
 
 	return &RosettaTypes.AccountBalanceResponse{
@@ -1470,14 +1555,15 @@ func (ec *Client) Balance(
 			},
 		},
 		BlockIdentifier: &RosettaTypes.BlockIdentifier{
-			Hash:  bal.Data.Block.Hash,
-			Index: bal.Data.Block.Number,
+			Hash:  eth_block.Header().Hash().String(),
+			Index: eth_block.Header().Number.Int64(),
 		},
 		Metadata: map[string]interface{}{
-			"nonce": nonce.Int64(),
-			"code":  bal.Data.Block.Account.Code,
+			"nonce": int64(nonce),
+			"code":  code,
 		},
 	}, nil
+
 }
 
 // GetBlockByNumberInput is the input to the call
@@ -1541,7 +1627,7 @@ func (ec *Client) Call(
 			return nil, err
 		}
 
-		// We cannot use RosettaTypes.MarshalMap because geth uses a custom
+		// We cannot use RosettaTypes.MarshalMap because findora uses a custom
 		// marshaler to convert *types.Receipt to JSON.
 		jsonOutput, err := receipt.MarshalJSON()
 		if err != nil {
@@ -1581,7 +1667,7 @@ func (ec *Client) Call(
 }
 
 // txPoolContentResponse represents the response for a call to
-// geth node on the "txpool_content" method.
+// findora node on the "txpool_content" method.
 type txPoolContentResponse struct {
 	Pending txPool `json:"pending"`
 	Queued  txPool `json:"queued"`
@@ -1591,7 +1677,7 @@ type txPool map[string]txPoolInner
 
 type txPoolInner map[string]rpcTransaction
 
-// GetMempool get and returns all the transactions on Ethereum TxPool (pending and queued).
+// GetMempool get and returns all the transactions on Findora TxPool (pending and queued).
 func (ec *Client) GetMempool(ctx context.Context) (*RosettaTypes.MempoolResponse, error) {
 	var response txPoolContentResponse
 	if err := ec.c.CallContext(ctx, &response, "txpool_content"); err != nil {

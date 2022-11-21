@@ -24,7 +24,7 @@ var (
 	Errors = []*types.Error{
 		ErrUnimplemented,
 		ErrUnavailableOffline,
-		ErrGeth,
+		ErrFindora,
 		ErrUnableToDecompressPubkey,
 		ErrUnclearIntent,
 		ErrUnableToParseIntermediateResult,
@@ -35,7 +35,7 @@ var (
 		ErrCallMethodInvalid,
 		ErrBlockOrphaned,
 		ErrInvalidAddress,
-		ErrGethNotReady,
+		ErrFindoraNotReady,
 		ErrInvalidInput,
 	}
 
@@ -53,11 +53,11 @@ var (
 		Message: "Endpoint unavailable offline",
 	}
 
-	// ErrGeth is returned when geth
+	// ErrFindora is returned when findora
 	// errors on a request.
-	ErrGeth = &types.Error{
+	ErrFindora = &types.Error{
 		Code:    2, //nolint
-		Message: "geth error",
+		Message: "findora error",
 	}
 
 	// ErrUnableToDecompressPubkey is returned when
@@ -138,11 +138,11 @@ var (
 		Message: "Invalid address",
 	}
 
-	// ErrGethNotReady is returned when geth
+	// ErrFindoraNotReady is returned when findora
 	// cannot yet serve any queries.
-	ErrGethNotReady = &types.Error{
+	ErrFindoraNotReady = &types.Error{
 		Code:      13, //nolint
-		Message:   "geth not ready",
+		Message:   "findora not ready",
 		Retriable: true,
 	}
 
