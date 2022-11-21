@@ -18,8 +18,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/coinbase/rosetta-ethereum/configuration"
-	"github.com/coinbase/rosetta-ethereum/ethereum"
+	"findora-rosetta/configuration"
+	findora "findora-rosetta/findora"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 )
@@ -51,11 +51,11 @@ func (s *BlockAPIService) Block(
 	}
 
 	block, err := s.client.Block(ctx, request.BlockIdentifier)
-	if errors.Is(err, ethereum.ErrBlockOrphaned) {
+	if errors.Is(err, findora.ErrBlockOrphaned) {
 		return nil, wrapErr(ErrBlockOrphaned, err)
 	}
 	if err != nil {
-		return nil, wrapErr(ErrGeth, err)
+		return nil, wrapErr(ErrFindora, err)
 	}
 
 	return &types.BlockResponse{
@@ -74,7 +74,7 @@ func (s *BlockAPIService) BlockTransaction(
 
 	tx, err := s.client.Transaction(ctx, request.BlockIdentifier, request.TransactionIdentifier)
 	if err != nil {
-		return nil, wrapErr(ErrGeth, err)
+		return nil, wrapErr(ErrFindora, err)
 	}
 
 	return &types.BlockTransactionResponse{

@@ -1,7 +1,7 @@
 {
   "network": {
     "blockchain": "Findora",
-    "network": "Anvil"
+    "network": "Prinet"
   },
   "online_url": "http://localhost:8080",
   "http_timeout": 500,
@@ -39,12 +39,26 @@
     }
   },
   "construction": {
+    "offline_url": "http://localhost:8080",
     "stale_depth": 3,
     "broadcast_limit": 5,
     "constructor_dsl_file": "findora.ros",
     "end_conditions": {
       "create_account": 10,
       "transfer": 20
-    }
+    },
+    "prefunded_accounts": [
+      {
+        "privkey": "b501fc5879f214ee8be2832e43955ac0f19e20d1f7e33436d6746ac889dc043d",
+        "account_identifier": {
+          "address": "0xA405BA2b64DC04466E0f23487FD1c4A084787326"
+        },
+        "curve_type": "secp256k1",
+        "currency": {
+          "symbol": "FRA",
+          "decimals": 18
+        }
+      }
+    ]
   }
 }

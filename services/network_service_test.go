@@ -18,9 +18,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/coinbase/rosetta-ethereum/configuration"
-	"github.com/coinbase/rosetta-ethereum/ethereum"
-	mocks "github.com/coinbase/rosetta-ethereum/mocks/services"
+	"findora-rosetta/configuration"
+	findora "findora-rosetta/findora"
+	mocks "findora-rosetta/mocks/services"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/stretchr/testify/assert"
@@ -35,17 +35,17 @@ var (
 			MiddlewareVersion: &middlewareVersion,
 		},
 		Allow: &types.Allow{
-			OperationStatuses:       ethereum.OperationStatuses,
-			OperationTypes:          ethereum.OperationTypes,
+			OperationStatuses:       findora.OperationStatuses,
+			OperationTypes:          findora.OperationTypes,
 			Errors:                  Errors,
-			HistoricalBalanceLookup: ethereum.HistoricalBalanceSupported,
-			CallMethods:             ethereum.CallMethods,
+			HistoricalBalanceLookup: findora.HistoricalBalanceSupported,
+			CallMethods:             findora.CallMethods,
 		},
 	}
 
 	networkIdentifier = &types.NetworkIdentifier{
-		Network:    ethereum.MainnetNetwork,
-		Blockchain: ethereum.Blockchain,
+		Network:    findora.MainnetNetwork,
+		Blockchain: findora.Blockchain,
 	}
 )
 
@@ -80,7 +80,7 @@ func TestNetworkEndpoints_Online(t *testing.T) {
 	cfg := &configuration.Configuration{
 		Mode:                   configuration.Online,
 		Network:                networkIdentifier,
-		GenesisBlockIdentifier: ethereum.MainnetGenesisBlockIdentifier,
+		GenesisBlockIdentifier: findora.MainnetGenesisBlockIdentifier,
 	}
 	mockClient := &mocks.Client{}
 	servicer := NewNetworkAPIService(cfg, mockClient)
@@ -122,7 +122,7 @@ func TestNetworkEndpoints_Online(t *testing.T) {
 	networkStatus, err := servicer.NetworkStatus(ctx, nil)
 	assert.Nil(t, err)
 	assert.Equal(t, &types.NetworkStatusResponse{
-		GenesisBlockIdentifier: ethereum.MainnetGenesisBlockIdentifier,
+		GenesisBlockIdentifier: findora.MainnetGenesisBlockIdentifier,
 		CurrentBlockIdentifier: currentBlock,
 		CurrentBlockTimestamp:  currentTime,
 		Peers:                  peers,

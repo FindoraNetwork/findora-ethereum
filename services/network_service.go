@@ -17,8 +17,8 @@ package services
 import (
 	"context"
 
-	"github.com/coinbase/rosetta-ethereum/configuration"
-	"github.com/coinbase/rosetta-ethereum/ethereum"
+	"findora-rosetta/configuration"
+	findora "findora-rosetta/findora"
 
 	"github.com/coinbase/rosetta-sdk-go/asserter"
 	"github.com/coinbase/rosetta-sdk-go/types"
@@ -58,16 +58,16 @@ func (s *NetworkAPIService) NetworkOptions(
 ) (*types.NetworkOptionsResponse, *types.Error) {
 	return &types.NetworkOptionsResponse{
 		Version: &types.Version{
-			NodeVersion:       ethereum.NodeVersion,
+			NodeVersion:       findora.NodeVersion,
 			RosettaVersion:    types.RosettaAPIVersion,
 			MiddlewareVersion: types.String(configuration.MiddlewareVersion),
 		},
 		Allow: &types.Allow{
 			Errors:                  Errors,
-			OperationTypes:          ethereum.OperationTypes,
-			OperationStatuses:       ethereum.OperationStatuses,
-			HistoricalBalanceLookup: ethereum.HistoricalBalanceSupported,
-			CallMethods:             ethereum.CallMethods,
+			OperationTypes:          findora.OperationTypes,
+			OperationStatuses:       findora.OperationStatuses,
+			HistoricalBalanceLookup: findora.HistoricalBalanceSupported,
+			CallMethods:             findora.CallMethods,
 		},
 	}, nil
 }
@@ -83,11 +83,11 @@ func (s *NetworkAPIService) NetworkStatus(
 
 	currentBlock, currentTime, syncStatus, peers, err := s.client.Status(ctx)
 	if err != nil {
-		return nil, wrapErr(ErrGeth, err)
+		return nil, wrapErr(ErrFindora, err)
 	}
 
 	if currentTime < asserter.MinUnixEpoch {
-		return nil, ErrGethNotReady
+		return nil, ErrFindoraNotReady
 	}
 
 	return &types.NetworkStatusResponse{

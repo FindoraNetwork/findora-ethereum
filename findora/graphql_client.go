@@ -33,7 +33,7 @@ const (
 )
 
 // GraphQLClient is a client used to make graphQL
-// queries to geth's graphql endpoint.
+// queries to findora's graphql endpoint.
 type GraphQLClient struct {
 	client *http.Client
 	url    string

@@ -16,39 +16,36 @@ package ethereum
 
 import (
 	"context"
-	"fmt"
+	"math/big"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
 const (
-	// NodeVersion is the version of geth we are using.
+	// NodeVersion is the version of findora we are using.
 	NodeVersion = "1.9.24"
 
-	// Blockchain is Ethereum.
-	Blockchain string = "Ethereum"
+	// Blockchain is Findora.
+	Blockchain string = "Findora"
 
 	// MainnetNetwork is the value of the network
 	// in MainnetNetworkIdentifier.
 	MainnetNetwork string = "Mainnet"
 
-	// RopstenNetwork is the value of the network
-	// in RopstenNetworkIdentifier.
-	RopstenNetwork string = "Ropsten"
+	// AnvilNetwork is the value of the network
+	// in AnvilNetworkIdentifier.
+	AnvilNetwork string = "Anvil"
 
-	// RinkebyNetwork is the value of the network
-	// in RinkebyNetworkNetworkIdentifier.
-	RinkebyNetwork string = "Rinkeby"
-
-	// GoerliNetwork is the value of the network
-	// in GoerliNetworkNetworkIdentifier.
-	GoerliNetwork string = "Goerli"
+	// PrinetNetwork is the value of the network
+	// in PrinetNetworkNetworkIdentifier.
+	PrinetNetwork string = "Prinet"
 
 	// Symbol is the symbol value
 	// used in Currency.
-	Symbol = "ETH"
+	Symbol = "FRA"
 
 	// Decimals is the decimals value
 	// used in Currency.
@@ -92,11 +89,11 @@ const (
 	DestructOpType = "DESTRUCT"
 
 	// SuccessStatus is the status of any
-	// Ethereum operation considered successful.
+	// Findora operation considered successful.
 	SuccessStatus = "SUCCESS"
 
 	// FailureStatus is the status of any
-	// Ethereum operation considered unsuccessful.
+	// Findora operation considered unsuccessful.
 	FailureStatus = "FAILURE"
 
 	// HistoricalBalanceSupported is whether
@@ -119,53 +116,47 @@ const (
 	// of a transfer.
 	TransferGasLimit = int64(21000) //nolint:gomnd
 
-	// MainnetGethArguments are the arguments to start a mainnet geth instance.
-	MainnetGethArguments = `--config=/app/ethereum/geth.toml --gcmode=archive --graphql`
-
-	// IncludeMempoolCoins does not apply to rosetta-ethereum as it is not UTXO-based.
+	// IncludeMempoolCoins does not apply to findora-rosetta as it is not UTXO-based.
 	IncludeMempoolCoins = false
 )
 
 var (
-	// RopstenGethArguments are the arguments to start a ropsten geth instance.
-	RopstenGethArguments = fmt.Sprintf("%s --ropsten", MainnetGethArguments)
+	// MainnetCommandArguments are the arguments to start a mainnet findroa instance.
+	MainnetCommandArguments = ""
 
-	// RinkebyGethArguments are the arguments to start a rinkeby geth instance.
-	RinkebyGethArguments = fmt.Sprintf("%s --rinkeby", MainnetGethArguments)
+	// AnvilCommandArguments are the arguments to start a anvil findroa instance.
+	AnvilCommandArguments = ""
 
-	// GoerliGethArguments are the arguments to start a ropsten geth instance.
-	GoerliGethArguments = fmt.Sprintf("%s --goerli", MainnetGethArguments)
+	// PrinetCommandArguments are the arguments to start a anvil findroa instance.
+	PrinetCommandArguments = ""
+
+	MainnetGenesisHash = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3")
+	AnvilGenesisHash   = common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d")
+	PrinetGenesisHash  = common.HexToHash("0xbf7e331f7f7c1dd2e05159666b3bf8bc7a8a3a9eb1d518969eab529dd9b88c1a")
 
 	// MainnetGenesisBlockIdentifier is the *types.BlockIdentifier
 	// of the mainnet genesis block.
 	MainnetGenesisBlockIdentifier = &types.BlockIdentifier{
-		Hash:  params.MainnetGenesisHash.Hex(),
+		Hash:  MainnetGenesisHash.Hex(),
 		Index: GenesisBlockIndex,
 	}
 
-	// RopstenGenesisBlockIdentifier is the *types.BlockIdentifier
-	// of the Ropsten genesis block.
-	RopstenGenesisBlockIdentifier = &types.BlockIdentifier{
-		Hash:  params.RopstenGenesisHash.Hex(),
+	// AnvilGenesisBlockIdentifier is the *types.BlockIdentifier
+	// of the Anvil genesis block.
+	AnvilGenesisBlockIdentifier = &types.BlockIdentifier{
+		Hash:  AnvilGenesisHash.Hex(),
 		Index: GenesisBlockIndex,
 	}
 
-	// RinkebyGenesisBlockIdentifier is the *types.BlockIdentifier
-	// of the Ropsten genesis block.
-	RinkebyGenesisBlockIdentifier = &types.BlockIdentifier{
-		Hash:  params.RinkebyGenesisHash.Hex(),
-		Index: GenesisBlockIndex,
-	}
-
-	// GoerliGenesisBlockIdentifier is the *types.BlockIdentifier
-	// of the Goerli genesis block.
-	GoerliGenesisBlockIdentifier = &types.BlockIdentifier{
-		Hash:  params.GoerliGenesisHash.Hex(),
+	// PrinetGenesisBlockIdentifier is the *types.BlockIdentifier
+	// of the Prinet genesis block.
+	PrinetGenesisBlockIdentifier = &types.BlockIdentifier{
+		Hash:  PrinetGenesisHash.Hex(),
 		Index: GenesisBlockIndex,
 	}
 
 	// Currency is the *types.Currency for all
-	// Ethereum networks.
+	// Findora networks.
 	Currency = &types.Currency{
 		Symbol:   Symbol,
 		Decimals: Decimals,
@@ -204,6 +195,68 @@ var (
 		"eth_getTransactionReceipt",
 		"eth_call",
 		"eth_estimateGas",
+	}
+)
+
+var (
+	MainnetChainConfig = &params.ChainConfig{
+		ChainID:                 big.NewInt(2152),
+		HomesteadBlock:          big.NewInt(0),
+		DAOForkBlock:            nil,
+		DAOForkSupport:          true,
+		EIP150Block:             big.NewInt(0),
+		EIP150Hash:              common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d"),
+		EIP155Block:             big.NewInt(10),
+		EIP158Block:             big.NewInt(10),
+		ByzantiumBlock:          big.NewInt(0),
+		ConstantinopleBlock:     big.NewInt(4_230_000),
+		PetersburgBlock:         big.NewInt(4_939_394),
+		IstanbulBlock:           big.NewInt(6_485_846),
+		MuirGlacierBlock:        big.NewInt(7_117_117),
+		BerlinBlock:             big.NewInt(9_812_189),
+		LondonBlock:             big.NewInt(10_499_401),
+		TerminalTotalDifficulty: new(big.Int).SetUint64(50000000000000000),
+		Ethash:                  new(params.EthashConfig),
+	}
+
+	AnvilChainConfig = &params.ChainConfig{
+		ChainID:                 big.NewInt(2152),
+		HomesteadBlock:          big.NewInt(0),
+		DAOForkBlock:            nil,
+		DAOForkSupport:          true,
+		EIP150Block:             big.NewInt(0),
+		EIP150Hash:              common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d"),
+		EIP155Block:             big.NewInt(10),
+		EIP158Block:             big.NewInt(10),
+		ByzantiumBlock:          big.NewInt(1_700_000),
+		ConstantinopleBlock:     big.NewInt(4_230_000),
+		PetersburgBlock:         big.NewInt(4_939_394),
+		IstanbulBlock:           big.NewInt(6_485_846),
+		MuirGlacierBlock:        big.NewInt(7_117_117),
+		BerlinBlock:             big.NewInt(9_812_189),
+		LondonBlock:             big.NewInt(10_499_401),
+		TerminalTotalDifficulty: new(big.Int).SetUint64(50000000000000000),
+		Ethash:                  new(params.EthashConfig),
+	}
+
+	PrinetPChainConfig = &params.ChainConfig{
+		ChainID:                 big.NewInt(2152),
+		HomesteadBlock:          big.NewInt(0),
+		DAOForkBlock:            nil,
+		DAOForkSupport:          true,
+		EIP150Block:             big.NewInt(0),
+		EIP150Hash:              common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d"),
+		EIP155Block:             big.NewInt(10),
+		EIP158Block:             big.NewInt(10),
+		ByzantiumBlock:          big.NewInt(0),
+		ConstantinopleBlock:     big.NewInt(0),
+		PetersburgBlock:         big.NewInt(0),
+		IstanbulBlock:           big.NewInt(0),
+		MuirGlacierBlock:        big.NewInt(0),
+		BerlinBlock:             big.NewInt(0),
+		LondonBlock:             big.NewInt(0),
+		TerminalTotalDifficulty: new(big.Int).SetUint64(50000000000000000),
+		Ethash:                  new(params.EthashConfig),
 	}
 )
 

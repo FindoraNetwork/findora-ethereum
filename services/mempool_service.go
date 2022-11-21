@@ -17,7 +17,8 @@ package services
 import (
 	"context"
 
-	"github.com/coinbase/rosetta-ethereum/configuration"
+	"findora-rosetta/configuration"
+
 	"github.com/coinbase/rosetta-sdk-go/server"
 	"github.com/coinbase/rosetta-sdk-go/types"
 )
@@ -50,7 +51,7 @@ func (s *MempoolAPIService) Mempool(
 
 	response, err := s.client.GetMempool(ctx)
 	if err != nil {
-		return nil, wrapErr(ErrGeth, err)
+		return nil, wrapErr(ErrFindora, err)
 	}
 
 	return response, nil

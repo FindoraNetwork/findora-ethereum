@@ -1,6 +1,6 @@
 request_funds(1){
   find_account{
-    currency = {"symbol":"ETH", "decimals":18};
+    currency = {"symbol":"FRA", "decimals":18};
     random_account = find_balance({
       "minimum_balance":{
         "value": "0",
@@ -17,7 +17,7 @@ request_funds(1){
     loaded_account = find_balance({
       "account_identifier": {{random_account.account_identifier}},
       "minimum_balance":{
-        "value": "10000000000000000",
+        "value": "1000000000",
         "currency": {{currency}}
       }
     });
@@ -26,7 +26,7 @@ request_funds(1){
 
 create_account(1){
   create{
-    network = {"network":"Ropsten", "blockchain":"Ethereum"};
+    network = {"network":"Prinet", "blockchain":"Findora"};
     key = generate_key({"curve_type": "secp256k1"});
     account = derive({
       "network_identifier": {{network}},
@@ -43,11 +43,11 @@ create_account(1){
 
 transfer(10){
   transfer{
-    transfer.network = {"network":"Ropsten", "blockchain":"Ethereum"};
-    currency = {"symbol":"ETH", "decimals":18};
+    transfer.network = {"network":"Prinet", "blockchain":"Findora"};
+    currency = {"symbol":"FRA", "decimals":18};
     sender = find_balance({
       "minimum_balance":{
-        "value": "10000000000000000",
+        "value": "1000000000",
         "currency": {{currency}}
       }
     });
@@ -96,8 +96,8 @@ transfer(10){
 return_funds(10){
   // TODO: add suggested fee dry run to ensure account fully cleared
   transfer{
-    transfer.network = {"network":"Ropsten", "blockchain":"Ethereum"};
-    currency = {"symbol":"ETH", "decimals":18};
+    transfer.network = {"network":"Prinet", "blockchain":"Findora"};
+    currency = {"symbol":"FRA", "decimals":18};
     max_fee = "84000000000000";
     sender = find_balance({
       "minimum_balance":{
