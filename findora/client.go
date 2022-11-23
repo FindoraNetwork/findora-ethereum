@@ -466,16 +466,16 @@ func (ec *Client) getBlock(
 	// We fetch traces last because we want to avoid limiting the number of other
 	// block-related data fetches we perform concurrently (we limit the number of
 	// concurrent traces that are computed to 16 to avoid overwhelming findora).
-	var traces []*rpcCall
-	var rawTraces []*rpcRawCall
-	var addTraces bool
-	if head.Number.Int64() != GenesisBlockIndex { // not possible to get traces at genesis
-		addTraces = true
-		// traces, rawTraces, err = ec.getBlockTraces(ctx, body.Hash)
-		// if err != nil {
-		// 	return nil, nil, fmt.Errorf("%w: could not get traces for %x", err, body.Hash[:])
-		// }
-	}
+	// var traces []*rpcCall
+	// var rawTraces []*rpcRawCall
+	// var addTraces bool
+	// if head.Number.Int64() != GenesisBlockIndex { // not possible to get traces at genesis
+	// 	addTraces = true
+	// 	traces, rawTraces, err = ec.getBlockTraces(ctx, body.Hash)
+	// 	if err != nil {
+	// 		return nil, nil, fmt.Errorf("%w: could not get traces for %x", err, body.Hash[:])
+	// 	}
+	// }
 
 	// Convert all txs to loaded txs
 	txs := make([]*types.Transaction, len(body.Transactions))
@@ -499,12 +499,12 @@ func (ec *Client) getBlock(
 		loadedTxs[i].Receipt = receipt
 
 		// Continue if calls does not exist (occurs at genesis)
-		if !addTraces {
-			continue
-		}
+		// if !addTraces {
+		// 	continue
+		// }
 
-		loadedTxs[i].Trace = traces[i].Result
-		loadedTxs[i].RawTrace = rawTraces[i].Result
+		//loadedTxs[i].Trace = traces[i].Result
+		//loadedTxs[i].RawTrace = rawTraces[i].Result
 	}
 
 	return types.NewBlockWithHeader(&head).WithBody(txs, uncles), loadedTxs, nil
@@ -1256,10 +1256,10 @@ func (ec *Client) populateTransaction(
 	ops = append(ops, feeOps...)
 
 	// Compute trace operations
-	traces := flattenTraces(tx.Trace, []*flatCall{})
+	// traces := flattenTraces(tx.Trace, []*flatCall{})
 
-	traceOps := traceOps(traces, len(ops))
-	ops = append(ops, traceOps...)
+	// traceOps := traceOps(traces, len(ops))
+	// ops = append(ops, traceOps...)
 
 	// Marshal receipt and trace data
 	// TODO: replace with marshalJSONMap (used in `services`)
@@ -1274,9 +1274,9 @@ func (ec *Client) populateTransaction(
 	}
 
 	var traceMap map[string]interface{}
-	if err := json.Unmarshal(tx.RawTrace, &traceMap); err != nil {
-		return nil, err
-	}
+	// if err := json.Unmarshal(tx.RawTrace, &traceMap); err != nil {
+	// 	return nil, err
+	// }
 
 	populatedTransaction := &RosettaTypes.Transaction{
 		TransactionIdentifier: &RosettaTypes.TransactionIdentifier{

@@ -70,7 +70,7 @@ curl -H 'Content-Type: application/json' --data '{ "network_identifier": { "bloc
 ```
 ### RPC Endpoint /construction/metadata test examplec
 ```
-url -H 'Content-Type: application/json' --data '{ "network_identifier": { "blockchain": "Findora", "network": "Prinet" }, "options": {}, "public_keys": [{ "hex_bytes": "string", "curve_type": "secp256k1" }] }' http://127.0.0.1:8080/construction/metadata
+curl -H 'Content-Type: application/json' --data '{ "network_identifier": { "blockchain": "Findora", "network": "Prinet" }, "options": {}, "public_keys": [{ "hex_bytes": "string", "curve_type": "secp256k1" }] }' http://127.0.0.1:8080/construction/metadata
 ```
 ### RPC Endpoint /construction/combine test example
 ```

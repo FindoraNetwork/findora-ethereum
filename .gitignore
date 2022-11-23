@@ -1,3 +1,6 @@
 findora-rosetta
 ethereum-data
 cli-data
+.vscode
+output
+bin
