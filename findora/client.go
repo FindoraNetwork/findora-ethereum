@@ -526,6 +526,8 @@ func calculateGas(
 	var feeBurned *big.Int
 	if head.BaseFee != nil { // EIP-1559
 		feeBurned = new(big.Int).Mul(gasUsed, head.BaseFee)
+	} else { // Legacy, Findora EVM burns fee by default
+		feeBurned = new(big.Int).Mul(gasUsed, gasPrice)
 	}
 
 	return feeAmount, feeBurned, nil
@@ -952,6 +954,8 @@ func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 	} else {
 		minerEarnedAmount = new(big.Int).Sub(tx.FeeAmount, tx.FeeBurned)
 	}
+
+	// Transaction fee
 	ops := []*RosettaTypes.Operation{
 		{
 			OperationIdentifier: &RosettaTypes.OperationIdentifier{
@@ -963,12 +967,15 @@ func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 				Address: MustChecksum(tx.From.String()),
 			},
 			Amount: &RosettaTypes.Amount{
-				Value:    new(big.Int).Neg(minerEarnedAmount).String(),
+				Value:    new(big.Int).Neg(tx.FeeAmount).String(),
 				Currency: Currency,
 			},
 		},
+	}
 
-		{
+	// Miner earned fee, if any
+	if minerEarnedAmount.Sign() == 1 {
+		earnedOp := &RosettaTypes.Operation{
 			OperationIdentifier: &RosettaTypes.OperationIdentifier{
 				Index: 1,
 			},
@@ -986,26 +993,52 @@ func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 				Value:    minerEarnedAmount.String(),
 				Currency: Currency,
 			},
+		}
+		ops = append(ops, earnedOp)
+	}
+
+	return ops
+}
+
+func transferOps(tx *loadedTransaction, startIndex int) []*RosettaTypes.Operation {
+	value := tx.Transaction.Value()
+	ops := []*RosettaTypes.Operation{
+		{
+			OperationIdentifier: &RosettaTypes.OperationIdentifier{
+				Index: int64(startIndex),
+			},
+			Type:   FeeOpType,
+			Status: RosettaTypes.String(SuccessStatus),
+			Account: &RosettaTypes.AccountIdentifier{
+				Address: MustChecksum(tx.From.String()),
+			},
+			Amount: &RosettaTypes.Amount{
+				Value:    new(big.Int).Neg(value).String(),
+				Currency: Currency,
+			},
+		},
+
+		{
+			OperationIdentifier: &RosettaTypes.OperationIdentifier{
+				Index: int64(startIndex + 1),
+			},
+			RelatedOperations: []*RosettaTypes.OperationIdentifier{
+				{
+					Index: int64(startIndex),
+				},
+			},
+			Type:   FeeOpType,
+			Status: RosettaTypes.String(SuccessStatus),
+			Account: &RosettaTypes.AccountIdentifier{
+				Address: MustChecksum(tx.Transaction.To().String()),
+			},
+			Amount: &RosettaTypes.Amount{
+				Value:    value.String(),
+				Currency: Currency,
+			},
 		},
 	}
-	if tx.FeeBurned == nil {
-		return ops
-	}
-	burntOp := &RosettaTypes.Operation{
-		OperationIdentifier: &RosettaTypes.OperationIdentifier{
-			Index: 2, // nolint:gomnd
-		},
-		Type:   FeeOpType,
-		Status: RosettaTypes.String(SuccessStatus),
-		Account: &RosettaTypes.AccountIdentifier{
-			Address: MustChecksum(tx.From.String()),
-		},
-		Amount: &RosettaTypes.Amount{
-			Value:    new(big.Int).Neg(tx.FeeBurned).String(),
-			Currency: Currency,
-		},
-	}
-	return append(ops, burntOp)
+	return ops
 }
 
 // transactionReceipt returns the receipt of a transaction by transaction hash.
@@ -1254,6 +1287,12 @@ func (ec *Client) populateTransaction(
 	// Compute fee operations
 	feeOps := feeOps(tx)
 	ops = append(ops, feeOps...)
+
+	// Compute transfer (successful tx ONLY) operations
+	if tx.Receipt.Status == 1 {
+		tsfOps := transferOps(tx, len(ops))
+		ops = append(ops, tsfOps...)
+	}
 
 	// Compute trace operations
 	// traces := flattenTraces(tx.Trace, []*flatCall{})

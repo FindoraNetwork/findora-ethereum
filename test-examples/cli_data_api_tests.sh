@@ -9,7 +9,7 @@ if [ -n "$(echo $1 | sed 's/[0-9]//g')" ]; then
     exit 1
 fi
 
-rm cli_tests/rosetta-data -rf
-mkdir -p cli_tests/rosetta-data
+rm -rf test-cli
+mkdir -p test-cli/rosetta-data
 export ROSETTA_CONFIGURATION_FILE=./rosetta-cli-conf/prinet/config.json
 rosetta-cli check:data --start-block $1

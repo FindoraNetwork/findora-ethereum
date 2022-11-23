@@ -4,3 +4,5 @@ cli-data
 .vscode
 output
 bin
+test-cli
+__debug_bin

@@ -104,16 +104,16 @@ curl -H 'Content-Type: application/json' --data '{"network_identifier": {"blockc
 ## Rosetta Cli Tools test examples
 ### Data Api test example
 ```
-rm cli_tests/rosetta-data -rf
-mkdir -p cli_tests/rosetta-data
-export ROSETTA_CONFIGURATION_FILE=./rosetta-cli-conf/prinet/config_data.json
+rm -rf test-cli
+mkdir -p test-cli/rosetta-data
+export ROSETTA_CONFIGURATION_FILE=./rosetta-cli-conf/prinet/config.json
 rosetta-cli check:data --start-block $start_block
 ```
 
 ### Construction Api test example
 ```
-rm cli_tests/rosetta-data -rf
-mkdir -p cli_tests/rosetta-data
-export ROSETTA_CONFIGURATION_FILE=./rosetta-cli-conf/prinet/config_data.json
+rm -rf test-cli
+mkdir -p test-cli/rosetta-data
+export ROSETTA_CONFIGURATION_FILE=./rosetta-cli-conf/prinet/config.json
 rosetta-cli check:construction
 ```
