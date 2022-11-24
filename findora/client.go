@@ -466,16 +466,16 @@ func (ec *Client) getBlock(
 	// We fetch traces last because we want to avoid limiting the number of other
 	// block-related data fetches we perform concurrently (we limit the number of
 	// concurrent traces that are computed to 16 to avoid overwhelming findora).
-	var traces []*rpcCall
-	var rawTraces []*rpcRawCall
-	var addTraces bool
-	if head.Number.Int64() != GenesisBlockIndex { // not possible to get traces at genesis
-		addTraces = true
-		// traces, rawTraces, err = ec.getBlockTraces(ctx, body.Hash)
-		// if err != nil {
-		// 	return nil, nil, fmt.Errorf("%w: could not get traces for %x", err, body.Hash[:])
-		// }
-	}
+	// var traces []*rpcCall
+	// var rawTraces []*rpcRawCall
+	// var addTraces bool
+	// if head.Number.Int64() != GenesisBlockIndex { // not possible to get traces at genesis
+	// 	addTraces = true
+	// 	traces, rawTraces, err = ec.getBlockTraces(ctx, body.Hash)
+	// 	if err != nil {
+	// 		return nil, nil, fmt.Errorf("%w: could not get traces for %x", err, body.Hash[:])
+	// 	}
+	// }
 
 	// Convert all txs to loaded txs
 	txs := make([]*types.Transaction, len(body.Transactions))
@@ -499,12 +499,12 @@ func (ec *Client) getBlock(
 		loadedTxs[i].Receipt = receipt
 
 		// Continue if calls does not exist (occurs at genesis)
-		if !addTraces {
-			continue
-		}
+		// if !addTraces {
+		// 	continue
+		// }
 
-		loadedTxs[i].Trace = traces[i].Result
-		loadedTxs[i].RawTrace = rawTraces[i].Result
+		//loadedTxs[i].Trace = traces[i].Result
+		//loadedTxs[i].RawTrace = rawTraces[i].Result
 	}
 
 	return types.NewBlockWithHeader(&head).WithBody(txs, uncles), loadedTxs, nil
@@ -526,6 +526,8 @@ func calculateGas(
 	var feeBurned *big.Int
 	if head.BaseFee != nil { // EIP-1559
 		feeBurned = new(big.Int).Mul(gasUsed, head.BaseFee)
+	} else { // Legacy, Findora EVM burns fee by default
+		feeBurned = new(big.Int).Mul(gasUsed, gasPrice)
 	}
 
 	return feeAmount, feeBurned, nil
@@ -952,6 +954,8 @@ func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 	} else {
 		minerEarnedAmount = new(big.Int).Sub(tx.FeeAmount, tx.FeeBurned)
 	}
+
+	// Transaction fee
 	ops := []*RosettaTypes.Operation{
 		{
 			OperationIdentifier: &RosettaTypes.OperationIdentifier{
@@ -963,12 +967,15 @@ func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 				Address: MustChecksum(tx.From.String()),
 			},
 			Amount: &RosettaTypes.Amount{
-				Value:    new(big.Int).Neg(minerEarnedAmount).String(),
+				Value:    new(big.Int).Neg(tx.FeeAmount).String(),
 				Currency: Currency,
 			},
 		},
+	}
 
-		{
+	// Miner earned fee, if any
+	if minerEarnedAmount.Sign() == 1 {
+		earnedOp := &RosettaTypes.Operation{
 			OperationIdentifier: &RosettaTypes.OperationIdentifier{
 				Index: 1,
 			},
@@ -986,26 +993,52 @@ func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 				Value:    minerEarnedAmount.String(),
 				Currency: Currency,
 			},
+		}
+		ops = append(ops, earnedOp)
+	}
+
+	return ops
+}
+
+func transferOps(tx *loadedTransaction, startIndex int) []*RosettaTypes.Operation {
+	value := tx.Transaction.Value()
+	ops := []*RosettaTypes.Operation{
+		{
+			OperationIdentifier: &RosettaTypes.OperationIdentifier{
+				Index: int64(startIndex),
+			},
+			Type:   FeeOpType,
+			Status: RosettaTypes.String(SuccessStatus),
+			Account: &RosettaTypes.AccountIdentifier{
+				Address: MustChecksum(tx.From.String()),
+			},
+			Amount: &RosettaTypes.Amount{
+				Value:    new(big.Int).Neg(value).String(),
+				Currency: Currency,
+			},
+		},
+
+		{
+			OperationIdentifier: &RosettaTypes.OperationIdentifier{
+				Index: int64(startIndex + 1),
+			},
+			RelatedOperations: []*RosettaTypes.OperationIdentifier{
+				{
+					Index: int64(startIndex),
+				},
+			},
+			Type:   FeeOpType,
+			Status: RosettaTypes.String(SuccessStatus),
+			Account: &RosettaTypes.AccountIdentifier{
+				Address: MustChecksum(tx.Transaction.To().String()),
+			},
+			Amount: &RosettaTypes.Amount{
+				Value:    value.String(),
+				Currency: Currency,
+			},
 		},
 	}
-	if tx.FeeBurned == nil {
-		return ops
-	}
-	burntOp := &RosettaTypes.Operation{
-		OperationIdentifier: &RosettaTypes.OperationIdentifier{
-			Index: 2, // nolint:gomnd
-		},
-		Type:   FeeOpType,
-		Status: RosettaTypes.String(SuccessStatus),
-		Account: &RosettaTypes.AccountIdentifier{
-			Address: MustChecksum(tx.From.String()),
-		},
-		Amount: &RosettaTypes.Amount{
-			Value:    new(big.Int).Neg(tx.FeeBurned).String(),
-			Currency: Currency,
-		},
-	}
-	return append(ops, burntOp)
+	return ops
 }
 
 // transactionReceipt returns the receipt of a transaction by transaction hash.
@@ -1255,11 +1288,17 @@ func (ec *Client) populateTransaction(
 	feeOps := feeOps(tx)
 	ops = append(ops, feeOps...)
 
-	// Compute trace operations
-	traces := flattenTraces(tx.Trace, []*flatCall{})
+	// Compute transfer (successful tx ONLY) operations
+	if tx.Receipt.Status == 1 {
+		tsfOps := transferOps(tx, len(ops))
+		ops = append(ops, tsfOps...)
+	}
 
-	traceOps := traceOps(traces, len(ops))
-	ops = append(ops, traceOps...)
+	// Compute trace operations
+	// traces := flattenTraces(tx.Trace, []*flatCall{})
+
+	// traceOps := traceOps(traces, len(ops))
+	// ops = append(ops, traceOps...)
 
 	// Marshal receipt and trace data
 	// TODO: replace with marshalJSONMap (used in `services`)
@@ -1274,9 +1313,9 @@ func (ec *Client) populateTransaction(
 	}
 
 	var traceMap map[string]interface{}
-	if err := json.Unmarshal(tx.RawTrace, &traceMap); err != nil {
-		return nil, err
-	}
+	// if err := json.Unmarshal(tx.RawTrace, &traceMap); err != nil {
+	// 	return nil, err
+	// }
 
 	populatedTransaction := &RosettaTypes.Transaction{
 		TransactionIdentifier: &RosettaTypes.TransactionIdentifier{

@@ -12,7 +12,7 @@
   "tip_delay": 3600,
   "log_configuration": false,
   "compression_disabled": false,
-  "data_directory": "./test-examples/rosetta-data",
+  "data_directory": "./test-cli/rosetta-data",
   "data": {
     "active_reconciliation_concurrency": 16,
     "inactive_reconciliation_concurrency": 4,
