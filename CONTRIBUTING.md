@@ -4,7 +4,7 @@
 
 All interactions with this project follow our [Code of Conduct][code-of-conduct].
 By participating, you are expected to honor this code. Violators can be banned
-from further participation in this project, or potentially all Coinbase projects.
+from further participation in this project, or potentially all Findora projects.
 
 [code-of-conduct]: https://github.com/coinbase/code-of-conduct
 
@@ -42,7 +42,7 @@ The best way to see a feature added, however, is to submit a pull request.
 
 ## Support Requests
 
-For security reasons, any communication referencing support tickets for Coinbase
+For security reasons, any communication referencing support tickets for Findora
 products will be ignored. The request will have its content redacted and will
 be locked to prevent further discussion.
 

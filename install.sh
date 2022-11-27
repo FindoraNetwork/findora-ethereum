@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2020 Coinbase, Inc.
+# Copyright 2020 Findora, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ EOF
 parse_args() {
   while getopts "dh?" arg; do
     case "$arg" in
-      d) log_set_priority 10 ;;
-      h | \?) usage "$0" ;;
+    d) log_set_priority 10 ;;
+    h | \?) usage "$0" ;;
     esac
   done
   shift $((OPTIND - 1))
@@ -85,15 +85,15 @@ log_priority() {
 }
 log_tag() {
   case $1 in
-    0) echo "emerg" ;;
-    1) echo "alert" ;;
-    2) echo "crit" ;;
-    3) echo "err" ;;
-    4) echo "warning" ;;
-    5) echo "notice" ;;
-    6) echo "info" ;;
-    7) echo "debug" ;;
-    *) echo "$1" ;;
+  0) echo "emerg" ;;
+  1) echo "alert" ;;
+  2) echo "crit" ;;
+  3) echo "err" ;;
+  4) echo "warning" ;;
+  5) echo "notice" ;;
+  6) echo "info" ;;
+  7) echo "debug" ;;
+  *) echo "$1" ;;
   esac
 }
 log_debug() {
@@ -115,13 +115,13 @@ log_crit() {
 untar() {
   tarball=$1
   case "${tarball}" in
-    *.tar.gz | *.tgz) tar --no-same-owner -xzf "${tarball}" ;;
-    *.tar) tar --no-same-owner -xf "${tarball}" ;;
-    *.zip) unzip "${tarball}" ;;
-    *)
-      log_err "untar unknown archive format for ${tarball}"
-      return 1
-      ;;
+  *.tar.gz | *.tgz) tar --no-same-owner -xzf "${tarball}" ;;
+  *.tar) tar --no-same-owner -xf "${tarball}" ;;
+  *.zip) unzip "${tarball}" ;;
+  *)
+    log_err "untar unknown archive format for ${tarball}"
+    return 1
+    ;;
   esac
 }
 http_download_curl() {
@@ -204,7 +204,7 @@ PREFIX="$OWNER/$REPO"
 
 # use in logging routines
 log_prefix() {
-	echo "$PREFIX"
+  echo "$PREFIX"
 }
 GITHUB_DOWNLOAD=https://github.com/${OWNER}/${REPO}/releases/download
 

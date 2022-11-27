@@ -6,7 +6,7 @@
 ADDLICENSE_IGNORE=-ignore ".github/**/*" -ignore ".idea/**/*"
 ADDLICENSE_INSTALL=go install github.com/google/addlicense@latest
 ADDLICENSE_CMD=addlicense
-ADDLICENCE_SCRIPT=${ADDLICENSE_CMD} -c "Coinbase, Inc." -l "apache" -v ${ADDLICENSE_IGNORE}
+ADDLICENCE_SCRIPT=${ADDLICENSE_CMD} -c "Findora, Inc." -l "apache" -v ${ADDLICENSE_IGNORE}
 SPELLCHECK_CMD=go run github.com/client9/misspell/cmd/misspell
 GOLINES_INSTALL=go install github.com/segmentio/golines@latest
 GOLINES_CMD=golines
@@ -93,7 +93,7 @@ check-format:
 	! ${GOIMPORTS_CMD} -l . | read
 
 salus:
-	docker run --rm -t -v ${PWD}:/home/repo coinbase/salus
+	docker run --rm -t -v ${PWD}:/home/repo findora/salus
 
 spellcheck:
 	${SPELLCHECK_CMD} -error .

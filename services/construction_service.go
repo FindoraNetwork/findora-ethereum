@@ -1,4 +1,4 @@
-// Copyright 2020 Coinbase, Inc.
+// Copyright 2020 Findora, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import (
 	ethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	"github.com/coinbase/rosetta-sdk-go/parser"
-	"github.com/coinbase/rosetta-sdk-go/types"
+	"github.com/findoranetwork/rosetta-sdk-go/parser"
+	"github.com/findoranetwork/rosetta-sdk-go/types"
 )
 
 // ConstructionAPIService implements the server.ConstructionAPIServicer interface.
