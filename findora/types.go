@@ -39,6 +39,10 @@ const (
 	// in AnvilNetworkIdentifier.
 	AnvilNetwork string = "Anvil"
 
+	// Qa02Network is the value of the network
+	// in Qa02NetworkIdentifier.
+	Qa02Network string = "Qa02"
+
 	// PrinetNetwork is the value of the network
 	// in PrinetNetworkNetworkIdentifier.
 	PrinetNetwork string = "Prinet"
@@ -127,11 +131,15 @@ var (
 	// AnvilCommandArguments are the arguments to start a anvil findroa instance.
 	AnvilCommandArguments = ""
 
-	// PrinetCommandArguments are the arguments to start a anvil findroa instance.
+	// Qa02CommandArguments are the arguments to start a qa02 findroa instance.
+	Qa02CommandArguments = ""
+
+	// PrinetCommandArguments are the arguments to start a prinet findroa instance.
 	PrinetCommandArguments = ""
 
 	MainnetGenesisHash = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3")
 	AnvilGenesisHash   = common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d")
+	Qa02GenesisHash    = common.HexToHash("0xbf7e331f7f7c1dd2e05159666b3bf8bc7a8a3a9eb1d518969eab529dd9b88c1a")
 	PrinetGenesisHash  = common.HexToHash("0xbf7e331f7f7c1dd2e05159666b3bf8bc7a8a3a9eb1d518969eab529dd9b88c1a")
 
 	// MainnetGenesisBlockIdentifier is the *types.BlockIdentifier
@@ -145,6 +153,13 @@ var (
 	// of the Anvil genesis block.
 	AnvilGenesisBlockIdentifier = &types.BlockIdentifier{
 		Hash:  AnvilGenesisHash.Hex(),
+		Index: GenesisBlockIndex,
+	}
+
+	// Qa02GenesisBlockIdentifier is the *types.BlockIdentifier
+	// of the Qa02 genesis block.
+	Qa02GenesisBlockIdentifier = &types.BlockIdentifier{
+		Hash:  Qa02GenesisHash.Hex(),
 		Index: GenesisBlockIndex,
 	}
 
@@ -220,7 +235,27 @@ var (
 	}
 
 	AnvilChainConfig = &params.ChainConfig{
-		ChainID:                 big.NewInt(2152),
+		ChainID:                 big.NewInt(2153),
+		HomesteadBlock:          big.NewInt(0),
+		DAOForkBlock:            nil,
+		DAOForkSupport:          true,
+		EIP150Block:             big.NewInt(0),
+		EIP150Hash:              common.HexToHash("0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d"),
+		EIP155Block:             big.NewInt(10),
+		EIP158Block:             big.NewInt(10),
+		ByzantiumBlock:          big.NewInt(1_700_000),
+		ConstantinopleBlock:     big.NewInt(4_230_000),
+		PetersburgBlock:         big.NewInt(4_939_394),
+		IstanbulBlock:           big.NewInt(6_485_846),
+		MuirGlacierBlock:        big.NewInt(7_117_117),
+		BerlinBlock:             big.NewInt(9_812_189),
+		LondonBlock:             big.NewInt(10_499_401),
+		TerminalTotalDifficulty: new(big.Int).SetUint64(50000000000000000),
+		Ethash:                  new(params.EthashConfig),
+	}
+
+	Qa02ChainConfig = &params.ChainConfig{
+		ChainID:                 big.NewInt(1111),
 		HomesteadBlock:          big.NewInt(0),
 		DAOForkBlock:            nil,
 		DAOForkSupport:          true,

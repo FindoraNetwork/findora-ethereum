@@ -1,3 +1,3 @@
 #!/bin/bash
-go get
-go build
+go get -v
+go build -v

@@ -135,7 +135,16 @@ func (ec *Client) Status(ctx context.Context) (
 			CurrentIndex: &currentIndex,
 			TargetIndex:  &targetIndex,
 		}
-	}
+	} //else {
+	// 	currentIndex := int64(header.Number.Int64())
+	// 	targetIndex := int64(header.Number.Int64())
+	// 	synced := true
+	// 	syncStatus = &RosettaTypes.SyncStatus{
+	// 		CurrentIndex: &currentIndex,
+	// 		TargetIndex:  &targetIndex,
+	// 		Synced:       &synced,
+	// 	}
+	// }
 
 	var peers []*RosettaTypes.Peer = make([]*RosettaTypes.Peer, 0)
 	//peers, err := ec.peers(ctx)
@@ -1007,7 +1016,7 @@ func transferOps(tx *loadedTransaction, startIndex int) []*RosettaTypes.Operatio
 			OperationIdentifier: &RosettaTypes.OperationIdentifier{
 				Index: int64(startIndex),
 			},
-			Type:   FeeOpType,
+			Type:   CallOpType,
 			Status: RosettaTypes.String(SuccessStatus),
 			Account: &RosettaTypes.AccountIdentifier{
 				Address: MustChecksum(tx.From.String()),
@@ -1027,7 +1036,7 @@ func transferOps(tx *loadedTransaction, startIndex int) []*RosettaTypes.Operatio
 					Index: int64(startIndex),
 				},
 			},
-			Type:   FeeOpType,
+			Type:   CallOpType,
 			Status: RosettaTypes.String(SuccessStatus),
 			Account: &RosettaTypes.AccountIdentifier{
 				Address: MustChecksum(tx.Transaction.To().String()),

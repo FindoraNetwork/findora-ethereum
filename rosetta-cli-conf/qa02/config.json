@@ -1,7 +1,7 @@
 {
   "network": {
     "blockchain": "Findora",
-    "network": "Anvil"
+    "network": "Qa02"
   },
   "online_url": "http://localhost:8080",
   "http_timeout": 500,
@@ -12,7 +12,7 @@
   "tip_delay": 3600,
   "log_configuration": false,
   "compression_disabled": false,
-  "data_directory": "./test-examples/rosetta-data",
+  "data_directory": "./test-cli/rosetta-data",
   "data": {
     "active_reconciliation_concurrency": 16,
     "inactive_reconciliation_concurrency": 4,
@@ -22,29 +22,39 @@
     "log_transactions": true,
     "log_balance_changes": true,
     "log_reconciliations": false,
-    "ignore_reconciliation_error": false,
+    "ignore_reconciliation_error": true,
     "exempt_accounts": "",
     "bootstrap_balances": "",
     "interesting_accounts": "",
-    "reconciliation_disabled": false,
-    "balance_tracking_disabled": false,
+    "reconciliation_disabled": true,
+    "balance_tracking_disabled": true,
     "coin_tracking_disabled": false,
     "results_output_file": "",
     "end_conditions": {
-      "reconciliation_coverage": {
-        "coverage": 0.95,
-        "from_tip": true,
-        "tip": true
-      }
+      "tip": true
     }
   },
   "construction": {
+    "offline_url": "http://localhost:8080",
     "stale_depth": 3,
     "broadcast_limit": 5,
     "constructor_dsl_file": "findora.ros",
     "end_conditions": {
       "create_account": 10,
       "transfer": 20
-    }
+    },
+    "prefunded_accounts": [
+      {
+        "privkey": "b501fc5879f214ee8be2832e43955ac0f19e20d1f7e33436d6746ac889dc043d",
+        "account_identifier": {
+          "address": "0xA405BA2b64DC04466E0f23487FD1c4A084787326"
+        },
+        "curve_type": "secp256k1",
+        "currency": {
+          "symbol": "FRA",
+          "decimals": 18
+        }
+      }
+    ]
   }
 }

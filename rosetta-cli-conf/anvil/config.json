@@ -1,7 +1,7 @@
 {
   "network": {
     "blockchain": "Findora",
-    "network": "Prinet"
+    "network": "Anvil"
   },
   "online_url": "http://localhost:8080",
   "http_timeout": 500,

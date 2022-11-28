@@ -123,6 +123,25 @@ func TestLoadConfiguration(t *testing.T) {
 				SkipFindoraAdmin:       true,
 			},
 		},
+		"all set (qa02)": {
+			Mode:             string(Online),
+			Network:          Qa02,
+			Port:             "1000",
+			SkipFindoraAdmin: "TRUE",
+			cfg: &Configuration{
+				Mode: Online,
+				Network: &types.NetworkIdentifier{
+					Network:    findora.Qa02Network,
+					Blockchain: findora.Blockchain,
+				},
+				Params:                 findora.Qa02ChainConfig,
+				GenesisBlockIdentifier: findora.Qa02GenesisBlockIdentifier,
+				Port:                   1000,
+				RpcURL:                 DefaultRpcURL,
+				FindoraArguments:       findora.Qa02CommandArguments,
+				SkipFindoraAdmin:       true,
+			},
+		},
 		"all set (private blockchain)": {
 			Mode:    string(Online),
 			Network: Prinet,

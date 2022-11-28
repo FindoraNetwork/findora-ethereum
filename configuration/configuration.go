@@ -42,14 +42,17 @@ const (
 	// Mainnet is the findora Mainnet.
 	Mainnet string = "MAINNET"
 
+	// Testnet defaults to `Anvil` for backwards compatibility.
+	Testnet string = "TESTNET"
+
 	// Anvil is the findora Anvil testnet.
 	Anvil string = "ANVIL"
 
+	// Qa02 is the findora Qa02 testnet.
+	Qa02 string = "QA02"
+
 	// Prinet is the findora Prinet testnet.
 	Prinet string = "PRINET"
-
-	// Testnet defaults to `Anvil` for backwards compatibility.
-	Testnet string = "TESTNET"
 
 	// DataDirectory is the default location for all
 	// persistent data.
@@ -137,6 +140,14 @@ func LoadConfiguration() (*Configuration, error) {
 		config.GenesisBlockIdentifier = findora.AnvilGenesisBlockIdentifier
 		config.Params = findora.AnvilChainConfig
 		config.FindoraArguments = findora.AnvilCommandArguments
+	case Qa02:
+		config.Network = &types.NetworkIdentifier{
+			Blockchain: findora.Blockchain,
+			Network:    findora.Qa02Network,
+		}
+		config.GenesisBlockIdentifier = findora.Qa02GenesisBlockIdentifier
+		config.Params = findora.Qa02ChainConfig
+		config.FindoraArguments = findora.Qa02CommandArguments
 	case Prinet:
 		config.Network = &types.NetworkIdentifier{
 			Blockchain: findora.Blockchain,

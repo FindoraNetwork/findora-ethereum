@@ -132,3 +132,19 @@ mkdir -p test-cli/rosetta-data
 export ROSETTA_CONFIGURATION_FILE=./rosetta-cli-conf/prinet/config.json
 rosetta-cli check:construction
 ```
+
+## Findora Rosetta Docker setup
+### Findora Rosetta Docker build and run
+```
+docker build . -t findora-rosetta
+docker run -p 8080:8080 -p 8545:8545 -e MODE=OFFLINE -itd --name findora-rosetta --restart always --privileged=true findora-rosetta
+```
+### Findora Rosetta Docker test
+```
+git clone https://github.com/FindoraNetwork/rosetta-cli.git
+cd rosetta-cli
+go build
+export ROSETTA_CONFIGURATION_FILE=./rosetta-cli-conf/prinet/config.json
+./test-examples/cli_construction_api_tests.sh prinet
+./test-examples/cli_data_api_tests.sh prinet 2
+```
