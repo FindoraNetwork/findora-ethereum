@@ -25,7 +25,7 @@ import (
 	"sort"
 	"testing"
 
-	mocks "findora-rosetta/mocks/ethereum"
+	mocks "github/findoranetwork/findora-rosetta/mocks/ethereum"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"

@@ -17,7 +17,7 @@ package main
 import (
 	"os"
 
-	"findora-rosetta/cmd"
+	"github/findoranetwork/findora-rosetta/cmd"
 
 	"github.com/fatih/color"
 )

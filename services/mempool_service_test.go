@@ -18,8 +18,8 @@ import (
 	"context"
 	"testing"
 
-	"findora-rosetta/configuration"
-	mocks "findora-rosetta/mocks/services"
+	"github/findoranetwork/findora-rosetta/configuration"
+	mocks "github/findoranetwork/findora-rosetta/mocks/services"
 
 	"github.com/findoranetwork/rosetta-sdk-go/types"
 

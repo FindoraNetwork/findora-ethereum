@@ -19,9 +19,9 @@ import (
 	"errors"
 	"testing"
 
-	"findora-rosetta/configuration"
-	findora "findora-rosetta/findora"
-	mocks "findora-rosetta/mocks/services"
+	"github/findoranetwork/findora-rosetta/configuration"
+	findora "github/findoranetwork/findora-rosetta/findora"
+	mocks "github/findoranetwork/findora-rosetta/mocks/services"
 
 	"github.com/findoranetwork/rosetta-sdk-go/types"
 	"github.com/stretchr/testify/assert"

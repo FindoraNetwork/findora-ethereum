@@ -17,8 +17,8 @@ package services
 import (
 	"context"
 
-	"findora-rosetta/configuration"
-	findora "findora-rosetta/findora"
+	"github/findoranetwork/findora-rosetta/configuration"
+	findora "github/findoranetwork/findora-rosetta/findora"
 
 	"github.com/findoranetwork/rosetta-sdk-go/asserter"
 	"github.com/findoranetwork/rosetta-sdk-go/types"

@@ -18,8 +18,8 @@ import (
 	"context"
 	"errors"
 
-	"findora-rosetta/configuration"
-	findora "findora-rosetta/findora"
+	"github/findoranetwork/findora-rosetta/configuration"
+	findora "github/findoranetwork/findora-rosetta/findora"
 
 	"github.com/findoranetwork/rosetta-sdk-go/types"
 )

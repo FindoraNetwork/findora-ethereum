@@ -21,9 +21,9 @@ import (
 	"math/big"
 	"testing"
 
-	"findora-rosetta/configuration"
-	findora "findora-rosetta/findora"
-	mocks "findora-rosetta/mocks/services"
+	"github/findoranetwork/findora-rosetta/configuration"
+	findora "github/findoranetwork/findora-rosetta/findora"
+	mocks "github/findoranetwork/findora-rosetta/mocks/services"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/findoranetwork/rosetta-sdk-go/types"

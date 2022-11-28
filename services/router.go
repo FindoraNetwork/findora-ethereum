@@ -17,7 +17,7 @@ package services
 import (
 	"net/http"
 
-	"findora-rosetta/configuration"
+	"github/findoranetwork/findora-rosetta/configuration"
 
 	"github.com/findoranetwork/rosetta-sdk-go/asserter"
 	"github.com/findoranetwork/rosetta-sdk-go/server"

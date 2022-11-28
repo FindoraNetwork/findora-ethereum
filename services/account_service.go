@@ -17,7 +17,7 @@ package services
 import (
 	"context"
 
-	"findora-rosetta/configuration"
+	"github/findoranetwork/findora-rosetta/configuration"
 
 	"github.com/findoranetwork/rosetta-sdk-go/types"
 )

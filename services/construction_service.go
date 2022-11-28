@@ -21,8 +21,8 @@ import (
 	"math/big"
 	"strconv"
 
-	"findora-rosetta/configuration"
-	findora "findora-rosetta/findora"
+	"github/findoranetwork/findora-rosetta/configuration"
+	findora "github/findoranetwork/findora-rosetta/findora"
 
 	"github.com/ethereum/go-ethereum/common"
 	ethTypes "github.com/ethereum/go-ethereum/core/types"

@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	findora "findora-rosetta/findora"
+	findora "github/findoranetwork/findora-rosetta/findora"
 
 	"github.com/spf13/cobra"
 )

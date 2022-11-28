@@ -20,7 +20,7 @@ import (
 	"os"
 	"strconv"
 
-	findora "findora-rosetta/findora"
+	findora "github/findoranetwork/findora-rosetta/findora"
 
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/findoranetwork/rosetta-sdk-go/types"

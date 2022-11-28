@@ -22,9 +22,9 @@ import (
 	"net/http"
 	"time"
 
-	"findora-rosetta/configuration"
-	findora "findora-rosetta/findora"
-	"findora-rosetta/services"
+	"github/findoranetwork/findora-rosetta/configuration"
+	findora "github/findoranetwork/findora-rosetta/findora"
+	"github/findoranetwork/findora-rosetta/services"
 
 	"github.com/findoranetwork/rosetta-sdk-go/asserter"
 	"github.com/findoranetwork/rosetta-sdk-go/server"

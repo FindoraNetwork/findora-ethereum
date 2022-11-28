@@ -16,7 +16,7 @@ package configuration
 
 import (
 	"errors"
-	findora "findora-rosetta/findora"
+	findora "github/findoranetwork/findora-rosetta/findora"
 	"os"
 	"testing"
 

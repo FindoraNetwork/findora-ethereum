@@ -1,4 +1,4 @@
-module findora-rosetta
+module github/findoranetwork/findora-rosetta
 
 require (
 	github.com/OneOfOne/xxhash v1.2.5 // indirect
