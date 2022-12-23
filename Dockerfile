@@ -19,38 +19,9 @@ ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
-# Compile findora platform
-FROM golang-builder as findora-platform-builder
-ENV PATH=/root/.cargo/bin:$PATH
-RUN apt-get update \
-  && DEBIAN_FRONTEND=noninteractive apt-get install libc-dev make git curl wget jq ssh python3-pip clang libclang-dev llvm-dev libleveldb-dev musl-tools pkg-config libssl-dev build-essential librocksdb-dev vim ca-certificates -y
-RUN pip3 install toml-cli
-RUN pip3 install toml
-RUN pip3 install web3
-RUN mkdir /root/.findora
-RUN echo "export OPENSSL_LIB_DIR=/usr/lib/x86_64-linux-gnu" >>/etc/profile
-RUN echo "export OPENSSL_INCLUDE_DIR=/usr/include/openssl" >>/etc/profile
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs >/root/rust_install.sh
-RUN chmod +x /root/rust_install.sh
-RUN /root/rust_install.sh --profile complete -y
-RUN /bin/bash -c "source /root/.profile"
-RUN /bin/bash -c "source /root/.bashrc"
-RUN /bin/bash -c "source /root/.cargo/env"
-RUN /bin/bash /root/.cargo/env
-RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-RUN cargo install crm
-RUN crm best
-RUN rustup target add x86_64-unknown-linux-musl
-RUN rustup install nightly
-RUN rustup target add wasm32-unknown-unknown --toolchain nightly
-RUN cargo install cargo-tarpaulin
-RUN git clone http://github.com/FindoraNetwork/platform.git -b v0.3.27-release \
-  && mv platform /root/ \
-  && cd /root/platform  \
-  && make build_release_debug
 
 # Compile and Run findora-rosetta
-FROM findora-platform-builder as findora-rosetta-builder
+FROM golang-builder as findora-rosetta-builder
 RUN apt-get update \
   && apt-get install -y ca-certificates \
   && update-ca-certificates
