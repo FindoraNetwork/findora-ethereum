@@ -632,6 +632,10 @@ func (ec *Client) getBlockReceipts(
 	if err := ec.c.BatchCallContext(ctx, reqs); err != nil {
 		return nil, err
 	}
+	//for i := range reqs {
+	//	fmt.Println(i, "-------", receipts[i].TxHash.Hex(), "-------", blockHash, "-------", receipts[i].BlockHash.Hex())
+	//}
+
 	for i := range reqs {
 		if reqs[i].Error != nil {
 			return nil, reqs[i].Error
@@ -1011,6 +1015,10 @@ func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 
 func transferOps(tx *loadedTransaction, startIndex int) []*RosettaTypes.Operation {
 	value := tx.Transaction.Value()
+	var toAddr string = "0x"
+	if nil != tx.Transaction.To() {
+		toAddr = MustChecksum(tx.Transaction.To().String())
+	}
 	ops := []*RosettaTypes.Operation{
 		{
 			OperationIdentifier: &RosettaTypes.OperationIdentifier{
@@ -1039,7 +1047,7 @@ func transferOps(tx *loadedTransaction, startIndex int) []*RosettaTypes.Operatio
 			Type:   CallOpType,
 			Status: RosettaTypes.String(SuccessStatus),
 			Account: &RosettaTypes.AccountIdentifier{
-				Address: MustChecksum(tx.Transaction.To().String()),
+				Address: toAddr,
 			},
 			Amount: &RosettaTypes.Amount{
 				Value:    value.String(),
