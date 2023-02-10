@@ -18,7 +18,9 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
-if [ "$1" = "anvil" ]; then
+if [ "$1" = "mainnet" ]; then
+    export RPCURL=https://prod-mainnet.prod.findora.org:8545
+elif [ "$1" = "anvil" ]; then
     export RPCURL=https://prod-testnet.prod.findora.org:8545
 elif [ "$1" = "qa02" ]; then
     export RPCURL=https://dev-qa02.dev.findora.org:8545

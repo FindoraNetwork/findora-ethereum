@@ -644,7 +644,7 @@ func (ec *Client) getBlockReceipts(
 			return nil, fmt.Errorf("got empty receipt for %x", txs[i].tx.Hash().Hex())
 		}
 
-		if receipts[i].BlockHash != blockHash {
+		if receipts[i].BlockHash != blockHash && receipts[i].Status != 0 {
 			return nil, fmt.Errorf(
 				"%w: expected block hash %s for transaction but got %s",
 				ErrBlockOrphaned,

@@ -121,7 +121,7 @@ curl -H 'Content-Type: application/json' --data '{"network_identifier":{"blockch
 ```
 rm -rf test-cli
 mkdir -p test-cli/rosetta-data
-export ROSETTA_CONFIGURATION_FILE=./rosetta-cli-conf/prinet/config.json
+export ROSETTA_CONFIGURATION_FILE=rosetta-cli-conf/prinet/config.json
 rosetta-cli check:data --start-block $start_block
 ```
 
@@ -129,7 +129,7 @@ rosetta-cli check:data --start-block $start_block
 ```
 rm -rf test-cli
 mkdir -p test-cli/rosetta-data
-export ROSETTA_CONFIGURATION_FILE=./rosetta-cli-conf/prinet/config.json
+export ROSETTA_CONFIGURATION_FILE=rosetta-cli-conf/prinet/config.json
 rosetta-cli check:construction
 ```
 
@@ -144,7 +144,7 @@ docker run -p 8080:8080 -p 8545:8545 -e MODE=OFFLINE -itd --name findora-rosetta
 git clone https://github.com/FindoraNetwork/rosetta-cli.git
 cd rosetta-cli
 go build
-export ROSETTA_CONFIGURATION_FILE=./rosetta-cli-conf/prinet/config.json
-./test-examples/cli_construction_api_tests.sh prinet
-./test-examples/cli_data_api_tests.sh prinet 2
+export ROSETTA_CONFIGURATION_FILE=rosetta-cli-conf/prinet/config.json
+bash -x test-examples/cli_construction_api_tests.sh prinet
+bash -x test-examples/cli_data_api_tests.sh prinet 2 1000
 ```

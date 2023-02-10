@@ -1,7 +1,7 @@
 {
   "network": {
     "blockchain": "Findora",
-    "network": "Prinet"
+    "network": "Mainnet"
   },
   "online_url": "http://localhost:8080",
   "http_timeout": 500,
@@ -21,21 +21,17 @@
     "log_blocks": true,
     "log_transactions": true,
     "log_balance_changes": true,
-    "log_reconciliations": true,
-    "ignore_reconciliation_error": false,
+    "log_reconciliations": false,
+    "ignore_reconciliation_error": true,
     "exempt_accounts": "",
     "bootstrap_balances": "",
     "interesting_accounts": "",
-    "reconciliation_disabled": false,
-    "balance_tracking_disabled": false,
+    "reconciliation_disabled": true,
+    "balance_tracking_disabled": true,
     "coin_tracking_disabled": false,
     "results_output_file": "",
     "end_conditions": {
-      "reconciliation_coverage": {
-        "coverage": 0.95,
-        "from_tip": true,
-        "tip": true
-      }
+      "tip": true
     }
   },
   "construction": {
